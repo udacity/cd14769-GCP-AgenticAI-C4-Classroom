@@ -1,0 +1,43 @@
+# Building module demos and exercises
+
+Your goal is to assist in writing code for demos and examples for different 
+modules. Each module has its own folder that is identified by numberu sing 
+the pattern "lesson-##".
+So for Module 1 the name of the folder would be "lesson-01".
+
+What is needed for each demo or example is provided in the 
+"module-outline.md" file. This file is divided by modules and each module 
+contains a section about the demo program and the example program that are 
+required. Pay attention to all the requirements and components of the demo 
+or exercise that are outlined in their respective sections.
+
+The demo program will be in the "demo" folder under the module folder.
+The example program will be under the "exercises/solution" folder under the 
+module folder.
+
+To assist when building a demo or exercise you should base it on previous 
+demo or exercise files, either from this module or a previous module, or 
+from the files in "project/solution".
+
+Other requirements for the code:
+* It must be written in python and using the ADK toolkit
+* There must be an "__init__.py" file. You can copy it from a previous demo 
+  or exercise folder. It must not be empty.
+* There must be an "agent.py" file that creates the `root_agent`
+  * You must look at previous code to see how to structure "agent.py"
+  * The name of the adk package is "google.adk".
+  * Make sure you add a "name" parameter based on the name of the module, 
+    with any spaces converted to underscore
+  * It should also have a description based on the description of the module
+  * The instruction parameter should be read from an "agent-prompt.txt" 
+    file. You can see other modules to see how this file should be loaded in.
+  * Make sure there is a model variable that is set to "gemini-2.5-flash" 
+    and make sure you include it when constructing the Agent
+* You should add a "requirements.txt"
+* When creating new module demos and exercises, always include the 
+  .env file by copying it from a previous module.
+* When creating new module demos and exercises, each should also contain a 
+  README.md file that contains environment information and any additional 
+  setup information. You can look at the README.md from previous modules for 
+  examples.
+* It should be clear and well documented
