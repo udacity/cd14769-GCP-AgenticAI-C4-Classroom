@@ -1,7 +1,7 @@
 # Building module demos and exercises
 
 Your goal is to assist in writing code for demos and examples for different 
-modules. Each module has its own folder that is identified by numberu sing 
+modules. Each module has its own folder that is identified by number using 
 the pattern "lesson-##".
 So for Module 1 the name of the folder would be "lesson-01".
 
@@ -33,7 +33,9 @@ Other requirements for the code:
     file. You can see other modules to see how this file should be loaded in.
   * Make sure there is a model variable that is set to "gemini-2.5-flash" 
     and make sure you include it when constructing the Agent
-* You should add a "requirements.txt"
+* You should add a "requirements.txt" that contains the python modules that 
+  are required and the version that we are currently using as the minimum 
+  version.
 * When creating new module demos and exercises, always include the 
   .env file by copying it from a previous module.
 * When creating new module demos and exercises, each should also contain a 
