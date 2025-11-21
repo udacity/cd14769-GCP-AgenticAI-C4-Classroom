@@ -1,0 +1,13 @@
+Given the user request for a loan,
+get the numeric value of the loan they are requesting
+and the type of the loan they want.
+If they do not specify a specific loan type, or what they want the loan
+for, then you should prompt them to provide it.
+
+Here are the types of loans:
+* auto - For purchase of an automobile
+* rv - For purchase of other recreational vehicles, such as a motorycle,
+  boat, or camper
+* home improvement - If they want the money to make improvements or
+  purchases for their house
+* personal - For other reasons that they may provide

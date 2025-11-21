@@ -1,0 +1,45 @@
+sources:
+  deposit:
+    kind: mysql
+    host: ${MYSQL_HOST}
+    port: ${MYSQL_PORT:3306}
+    database: bank
+    user: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
+tools:
+  get-accounts:
+    kind: mysql-sql
+    source: deposit
+    description: Get the list of current accounts. You should use this list to get the correct name for each account before trying to access it.
+    statement: SELECT account_type from accounts
+  get-balance:
+    kind: mysql-sql
+    source: deposit
+    description: Get the current balance on the account
+    parameters:
+      - name: name
+        type: string
+        description: The name of the account
+    statement: SELECT balance FROM accounts WHERE account_type = ?
+  check-minimum-balance:
+    kind: mysql-sql
+    source: deposit
+    description: Checks if the total balance of all accounts is greater than or equal to the minimum balance.
+    parameters:
+      - name: minimum_balance
+        type: float
+        description: The minimum balance we are comparing against
+    statement: SELECT SUM(balance) >= ? FROM accounts WHERE customer_id = 1
+  get-transactions:
+    kind: mysql-sql
+    source: deposit
+    description: Get the last transactions for a specific account.
+    parameters:
+      - name: name
+        type: string
+        description: The name of the account
+      - name: limit
+        type: integer
+        description: The number of transactions to return
+        default: 5
+    statement: SELECT transaction_date, amount, description FROM transactions WHERE account_id = (SELECT id FROM accounts WHERE account_type = ?) ORDER BY transaction_date DESC LIMIT ?

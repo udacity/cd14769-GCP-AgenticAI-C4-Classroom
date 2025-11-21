@@ -1,0 +1,23 @@
+{
+  "name": "manager",
+  "url": "http://localhost:8000/a2a/manager",
+  "description": "Agent that can answer customer questions about the bank and their accounts",
+  "version": "1.0.1",
+  "defaultInputModes": ["text/plain"],
+  "defaultOutputModes": ["text/plain"],
+  "capabilities": {
+    "streaming": false,
+    "functions": true
+  },
+  "skills": [
+    {
+      "id": "bank_info",
+      "name": "Bank Information",
+      "description": "Answer customer questions about the bank or their accounts.",
+      "tags": ["Loan", "Deposit", "Bank information"],
+      "examples": [
+        "What is my current balance?"
+      ]
+    }
+  ]
+}

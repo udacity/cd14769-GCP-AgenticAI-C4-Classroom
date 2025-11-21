@@ -1,0 +1,15 @@
+http://localhost:8000/a2a/manager,What is my current balance on the vacation account?,msg-001-1,,thread-001
+http://localhost:8000/a2a/manager,What is my current balance?,msg-002-1,,thread-002
+http://localhost:8000/a2a/manager,My primary account,msg-002-2,,thread-002
+http://localhost:8000/a2a/manager,How much do I have on deposit?,msg-003-1,,thread-003
+http://localhost:8000/a2a/manager,What was my most recent payment on my main account?,msg-004-1,,thread-004
+http://localhost:8000/a2a/manager,How much did I pay the hotel on vacation?,msg-005-1,,thread-005
+http://localhost:8000/a2a/manager,Add $1000 to my vacation account.,msg-006-1,,thread-006
+http://localhost:8000/a2a/manager,Can I get $100 for bubble gum?,msg-007-1,,thread-007
+http://localhost:8000/a2a/manager,"In that case, can I get $10000?",msg-007-2,,thread-007
+http://localhost:8000/a2a/manager,I'd like to get a $700 loan,msg-008-1,,thread-008
+http://localhost:8000/a2a/manager,I want to buy an off-road 4x4 and my buddy can get a good deal on one.,msg-008-2,,thread-008
+http://localhost:8000/a2a/manager,"I'm looking to buy a new house for about $500,000",msg-009-1,,thread-009
+http://localhost:8000/a2a/manager,"Hey, I think I can get a good deal on a car for $10,000. Can I borrow that much?",msg-010-1,,thread-010
+http://localhost:8000/a2a/manager,"When is my next auto payment due?",msg-011-1,,thread-011
+http://localhost:8000/a2a/manager,"How much do I still owe on my personal loan?",msg-012-1,,thread-012
