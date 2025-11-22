@@ -11,7 +11,7 @@ class OrderStatus(Enum):
 # Value: dict with keys 'cart', 'address', 'order_status'
 orders = {
     "1001": {
-        "cart": ["item1", "item2"],
+        "cart": ["P001", "P002"],
         "address": {
             "name": "John Doe",
             "address_1": "123 Main St",
@@ -23,9 +23,9 @@ orders = {
         "order_status": OrderStatus.PLACED
     },
     "1002": {
-        "cart": ["item3", "item4"]
+        "cart": ["P002", "P004"]
     },
     "1003": {
-        "cart": ["item5"]
+        "cart": ["P001"]
     }
 }
