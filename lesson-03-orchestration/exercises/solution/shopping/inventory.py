@@ -1,5 +1,6 @@
 import os
-from google.adk.agents import Agent
+from pydantic import BaseModel, Field
+from google.adk.agents import Agent, LlmAgent
 from .products import products, product_counts
 
 model = "gemini-2.5-flash"
@@ -30,4 +31,18 @@ inventory_agent = Agent(
     model=model,
     instruction=inventory_instruction,
     tools=[check_inventory],
+)
+
+class InventoryData(BaseModel):
+    product_id: str = Field(description="The product ID checked.")
+    in_stock: bool = Field(description="Whether the product is in stock.")
+    count: int = Field(description="The quantity available.")
+
+inventory_data_agent = LlmAgent(
+    name="inventory_data_agent",
+    description="Checks product inventory and returns structured data.",
+    model=model,
+    instruction="Check the inventory for the given product ID and return the details.",
+    tools=[check_inventory],
+    output_schema=InventoryData
 )
