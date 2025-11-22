@@ -1,6 +1,6 @@
 import os
 from google.adk.agents import Agent
-from .products import products
+from .products import products, product_counts
 
 model = "gemini-2.5-flash"
 
@@ -17,7 +17,7 @@ def check_inventory(product_id: str):
         product_id: The ID of the product to check.
     """
     if product_id in products:
-        count = products[product_id]["inventory_count"]
+        count = product_counts.get(product_id, 0)
         return {"product_id": product_id, "in_stock": count > 0, "count": count}
     else:
         return {"error": "Product ID not found"}
