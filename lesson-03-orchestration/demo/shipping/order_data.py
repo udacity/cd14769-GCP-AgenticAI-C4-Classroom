@@ -1,6 +1,7 @@
 from enum import Enum
 
 class OrderStatus(Enum):
+    PENDING = "pending"
     PLACED = "placed"
     PACKAGED = "packaged"
     SHIPPED = "shipped"

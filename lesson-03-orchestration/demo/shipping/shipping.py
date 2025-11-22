@@ -25,8 +25,8 @@ class TaxCostOutput(BaseModel):
     state: str = Field(description="The state used for tax calculation.")
     subtotal: float = Field(description="The subtotal of the order.")
 
-class FinalizeOrderOutput(BaseModel):
-    order_id: str = Field(description="The ID of the finalized order.")
+class ComputeOrderOutput(BaseModel):
+    order_id: str = Field(description="The ID of the order.")
     subtotal: float = Field(description="The order subtotal.")
     shipping_cost: float = Field(description="The shipping cost.")
     tax_amount: float = Field(description="The tax amount.")
@@ -44,7 +44,6 @@ class AddressOutput(BaseModel):
 class PlaceOrderOutput(BaseModel):
     cart: list = Field(description="List of items in the cart.")
     address: AddressOutput = Field(description="The shipping address.")
-    order_status: str = Field(description="The status of the order.")
 
 # --- Tools ---
 
@@ -64,12 +63,12 @@ def place_order(order_id: str, address: dict):
         return {"error": "Order already has a status set"}
 
     order["address"] = address
-    order["order_status"] = OrderStatus.PLACED
+    # NOTE: Removed setting status to PLACED here, as requested by user implicit logic 
+    # (approve_order will do it).
     
     return {
         "cart": order.get("cart"),
         "address": order.get("address"),
-        "order_status": order["order_status"].value
     }
 
 def calculate_shipping_cost(order_id: str, shipping_type: str = "standard") -> dict:
@@ -106,8 +105,8 @@ def calculate_taxes_cost(order_id: str, state: str) -> dict:
     tax_amount = subtotal * rate
     return {"tax_amount": round(tax_amount, 2), "state": state, "subtotal": subtotal}
 
-def finalize_order_cost(order_id: str, shipping_cost: float, tax_amount: float) -> dict:
-    """Finalizes the order cost by adding shipping and taxes, and updates the order.
+def compute_order_cost(order_id: str, shipping_cost: float, tax_amount: float) -> dict:
+    """Compute the order cost by adding shipping and taxes, and updates the order.
 
     Args:
         order_id: The ID of the order.
@@ -130,6 +129,7 @@ def finalize_order_cost(order_id: str, shipping_cost: float, tax_amount: float) 
     order["shipping_cost"] = shipping_cost
     order["tax_amount"] = tax_amount
     order["total_cost"] = round(total_cost, 2)
+    order["order_status"] = OrderStatus.PENDING # Set to PENDING while waiting approval
 
     return {
         "order_id": order_id,
@@ -139,6 +139,25 @@ def finalize_order_cost(order_id: str, shipping_cost: float, tax_amount: float) 
         "total_cost": round(total_cost, 2),
         "order_status": order["order_status"].value
     }
+
+def approve_order(order_id: str) -> dict:
+    """Approves the order and sets its status to PLACED.
+
+    Args:
+        order_id: The ID of the order to approve.
+    """
+    if order_id not in orders:
+        return {"error": f"Order {order_id} not found."}
+
+    order = orders[order_id]
+    order["order_status"] = OrderStatus.PLACED
+
+    return {
+        "order_id": order_id,
+        "order_status": order["order_status"].value,
+        "message": "Order successfully approved and placed."
+    }
+
 
 # --- Sub-Agents --- 
 
@@ -166,13 +185,13 @@ costs_agent = ParallelAgent(
     sub_agents=[shipping_cost_agent, taxes_cost_agent],
 )
 
-finalize_agent = LlmAgent(
-    name="finalize_order_agent",
-    description="Combines shipping and tax costs to finalize the order total.",
+compute_order_agent = LlmAgent(
+    name="compute_order_agent",
+    description="Combines shipping and tax costs to compute the order total.",
     model=model,
-    instruction=read_prompt("finalize-order-prompt.txt"),
-    tools=[finalize_order_cost],
-    output_schema=FinalizeOrderOutput,
+    instruction=read_prompt("compute-order-prompt.txt"),
+    tools=[compute_order_cost],
+    output_schema=ComputeOrderOutput,
 )
 
 place_order_agent = LlmAgent(
@@ -182,6 +201,21 @@ place_order_agent = LlmAgent(
     instruction=read_prompt("place-order-prompt.txt"),
     tools=[place_order],
     output_schema=PlaceOrderOutput,
+)
+
+order_summary_agent = LlmAgent(
+    name="order_summary_agent",
+    description="Summarizes the order details for the customer.",
+    model=model,
+    instruction=read_prompt("order-summary-prompt.txt"),
+)
+
+approve_order_agent = LlmAgent(
+    name="approve_order_agent",
+    description="Approves the order and sets status to PLACED upon user confirmation.",
+    model=model,
+    instruction=read_prompt("approve-order-prompt.txt"),
+    tools=[approve_order],
 )
 
 # --- Main Shipping Agent ---
@@ -195,7 +229,8 @@ fulfillment_workflow_agent = SequentialAgent(
     sub_agents=[
         place_order_agent,
         costs_agent,
-        finalize_agent,
+        compute_order_agent,
+        order_summary_agent,
     ],
 )
 
@@ -205,5 +240,5 @@ shipping_agent = Agent(
     description="Handles all shipping related tasks: placing orders and calculating final costs.",
     model=model,
     instruction=shipping_instruction,
-    sub_agents=[fulfillment_workflow_agent],
+    sub_agents=[fulfillment_workflow_agent, approve_order_agent],
 )
