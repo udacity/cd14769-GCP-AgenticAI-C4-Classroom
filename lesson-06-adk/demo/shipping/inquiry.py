@@ -1,6 +1,6 @@
 import os
 from google.adk.agents import Agent
-from .order_data import orders, OrderStatus
+from toolbox_core import ToolboxSyncClient
 
 model = "gemini-2.5-flash"
 
@@ -10,21 +10,12 @@ def read_prompt(filename):
     with open(file_path, "r") as f:
         return f.read()
 
-def get_order_info(order_id: str):
-    """Retrieves detailed information for a given order ID.
+# --- Database Connection ---
+toolbox_url = os.environ.get("TOOLBOX_URL", "http://127.0.0.1:5000")
+print(f"Connecting to Toolbox at {toolbox_url}")
+db_client = ToolboxSyncClient(toolbox_url)
 
-    Args:
-        order_id: The ID of the order to retrieve information for.
-    """
-    if order_id in orders:
-        order = orders[order_id]
-        return {
-            "cart": order.get("cart"),
-            "address": order.get("address"),
-            "order_status": order.get("order_status").value if order.get("order_status") else None
-        }
-    else:
-        return {"error": f"Order {order_id} not found."}
+get_order_tool = db_client.load_tool("get-order")
 
 inquiry_instruction = read_prompt("inquiry-prompt.txt")
 
@@ -33,5 +24,5 @@ inquiry_agent = Agent(
     description="Handles questions about shipping policies and tracking.",
     model=model,
     instruction=inquiry_instruction,
-    tools=[get_order_info],
+    tools=[get_order_tool],
 )

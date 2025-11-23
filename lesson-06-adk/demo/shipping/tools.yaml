@@ -1,5 +1,5 @@
 sources:
-  orders:
+  storefront:
     kind: mysql
     host: ${MYSQL_HOST}
     port: ${MYSQL_PORT:3306}
@@ -16,26 +16,26 @@ tools:
         type: integer
         description: The ID of the order to retrieve.
     statement: SELECT * FROM orders WHERE order_id = ?
-  get-open-orders-by-user:
+  get-open-order-for-user:
     kind: mysql-sql
     source: storefront
-    description: Retrieve all open orders (orders without a status) for a specific user.
+    description: Retrieve the open order (orders without a status) for a specific user.
     parameters:
       - name: user_id
         type: string
         description: The ID of the user.
-    statement: SELECT * FROM orders WHERE user_id = ? AND order_status IS NULL
+    statement: SELECT * FROM orders WHERE user_id = ? AND order_status IS NULL LIMIT 1
   update-order-address:
     kind: mysql-sql
     source: storefront
     description: Update the shipping address for an order.
     parameters:
-      - name: order_id
-        type: integer
-        description: The ID of the order to update.
       - name: address
         type: string
         description: The address as a JSON string.
+      - name: order_id
+        type: integer
+        description: The ID of the order to update.
     statement: UPDATE orders SET address = ? WHERE order_id = ?
   update-order-status:
     kind: mysql-sql

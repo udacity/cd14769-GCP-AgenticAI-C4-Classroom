@@ -1,12 +1,22 @@
 import os
+import json
 from pydantic import BaseModel, Field
-from typing import Optional, AsyncGenerator
+from typing import Optional, AsyncGenerator, List
 from google.adk.agents import Agent, SequentialAgent, ParallelAgent, LlmAgent, InvocationContext, BaseAgent
 from google.adk.events import Event
 from google.adk.tools.tool_context import ToolContext
-from .order_data import orders, OrderStatus
+from toolbox_core import ToolboxSyncClient
 from .rates import SHIPPING_RATES, TAX_RATES
 from .products import products
+
+# OrderStatus Enum for consistency with DB strings
+from enum import Enum
+class OrderStatus(Enum):
+    PENDING = "pending"
+    PLACED = "placed"
+    PACKAGED = "packaged"
+    SHIPPED = "shipped"
+    RECEIVED = "received"
 
 model = "gemini-2.5-flash"
 
@@ -15,6 +25,17 @@ def read_prompt(filename):
     file_path = os.path.join(script_dir, filename)
     with open(file_path, "r") as f:
         return f.read()
+
+# --- Database Connection ---
+toolbox_url = os.environ.get("TOOLBOX_URL", "http://127.0.0.1:5000")
+print(f"Connecting to Toolbox at {toolbox_url}")
+db_client = ToolboxSyncClient(toolbox_url)
+
+get_order_tool = db_client.load_tool("get-order")
+get_open_order_tool = db_client.load_tool("get-open-order-for-user")
+update_order_address_tool = db_client.load_tool("update-order-address")
+update_order_status_tool = db_client.load_tool("update-order-status")
+update_order_costs_tool = db_client.load_tool("update-order-costs")
 
 # --- Schemas ---
 
@@ -49,56 +70,28 @@ class PlaceOrderOutput(BaseModel):
 
 # --- Tools ---
 
-def place_order(order_id: str, address: dict, tool_context: ToolContext ):
-    """Places an order by adding the shipping address and setting status to PLACED.
-    Also saves the order being worked on in the session state
-
-    Args:
-        order_id: The ID of the order.
-        address: Dictionary with name, address_1, address_2, city, state, postal_code.
-    """
-    if order_id not in orders:
-        return {"error": "Order ID not found"}
-    
-    order = orders[order_id]
-    
-    if "order_status" in order and order["order_status"]:
-        return {"error": "Order already has a status set"}
-
-    order["address"] = address
-    tool_context.state["order"] = order
-
+def get_user(tool_context: ToolContext):
     return {
-        "cart": order.get("cart"),
-        "address": order.get("address"),
+        "user_id": tool_context.session.user_id,
     }
 
-def calculate_shipping_cost(order_id: str, shipping_type: str = "standard") -> dict:
+def calculate_shipping_cost(shipping_type: str = "standard") -> dict:
     """Calculates the shipping cost for an order.
 
     Args:
-        order_id: The ID of the order.
         shipping_type: The type of shipping (e.g., "standard", "express"). Defaults to "standard".
     """
-    if order_id not in orders:
-        return {"error": f"Order {order_id} not found."}
-
     cost = SHIPPING_RATES.get(shipping_type.lower(), SHIPPING_RATES["standard"])
     return {"shipping_cost": cost, "shipping_type": shipping_type}
 
-def calculate_taxes_cost(order_id: str, state: str) -> dict:
+def calculate_taxes_cost(cart_items: List[str], state: str) -> dict:
     """Calculates the tax cost for an order based on the shipping state.
 
     Args:
-        order_id: The ID of the order.
+        cart_items: A list of strings with the items in the cart
         state: The two-letter state code for tax calculation (e.g., "CA", "NY").
     """
-    if order_id not in orders:
-        return {"error": f"Order {order_id} not found."}
-
-    # Calculate subtotal from cart items
     subtotal = 0.0
-    cart_items = orders[order_id].get("cart", [])
     for product_id in cart_items:
         if product_id in products:
             subtotal += products[product_id]["price"]
@@ -107,60 +100,31 @@ def calculate_taxes_cost(order_id: str, state: str) -> dict:
     tax_amount = subtotal * rate
     return {"tax_amount": round(tax_amount, 2), "state": state, "subtotal": subtotal}
 
-def compute_subtotal(order) -> float:
+def compute_subtotal(cart_items: List[str]) -> float:
     subtotal = 0.0
-    cart_items = order.get("cart", [])
     for product_id in cart_items:
         if product_id in products:
             subtotal += products[product_id]["price"]
     return subtotal
 
-def compute_order_cost(order_id: str, shipping_cost: float, tax_amount: float) -> dict:
+def compute_order_cost(cart_items: List[str], shipping_cost: float, tax_amount: float) -> dict:
     """Compute the order cost by adding shipping and taxes, and updates the order.
 
     Args:
-        order_id: The ID of the order.
+        cart_items: A list of strings with the items in the cart
         shipping_cost: The calculated shipping cost.
         tax_amount: The calculated tax amount.
     """
-    if order_id not in orders:
-        return {"error": f"Order {order_id} not found."}
-
-    order = orders[order_id]
-    subtotal = compute_subtotal(order)
+    subtotal = compute_subtotal(cart_items)
     total_cost = subtotal + shipping_cost + tax_amount
     
-    order["shipping_cost"] = shipping_cost
-    order["tax_amount"] = tax_amount
-    order["total_cost"] = round(total_cost, 2)
-    order["order_status"] = OrderStatus.PENDING # Set to PENDING while waiting approval
-
     return {
-        "order_id": order_id,
         "subtotal": round(subtotal, 2),
         "shipping_cost": shipping_cost,
         "tax_amount": tax_amount,
         "total_cost": round(total_cost, 2),
-        "order_status": order["order_status"].value
     }
 
-def approve_order(order_id: str) -> dict:
-    """Approves the order and sets its status to PLACED.
-
-    Args:
-        order_id: The ID of the order to approve.
-    """
-    if order_id not in orders:
-        return {"error": f"Order {order_id} not found."}
-
-    order = orders[order_id]
-    order["order_status"] = OrderStatus.PLACED
-
-    return {
-        "order_id": order_id,
-        "order_status": order["order_status"].value,
-        "message": "Order successfully approved and placed."
-    }
 
 
 # --- Sub-Agents --- 
@@ -237,7 +201,7 @@ compute_order_agent = LlmAgent(
     description="Combines shipping and tax costs to compute the order total.",
     model=model,
     instruction=read_prompt("compute-order-prompt.txt"),
-    tools=[compute_order_cost],
+    tools=[compute_order_cost, update_order_costs_tool],
     output_schema=ComputeOrderOutput,
 )
 
@@ -246,7 +210,7 @@ place_order_agent = LlmAgent(
     description="Handles the initial placement of an order by setting the address.",
     model=model,
     instruction=read_prompt("place-order-prompt.txt"),
-    tools=[place_order],
+    tools=[get_user, get_open_order_tool, update_order_address_tool],
     output_schema=PlaceOrderOutput,
 )
 
@@ -262,7 +226,7 @@ approve_order_agent = LlmAgent(
     description="Approves the order and sets status to PLACED upon user confirmation.",
     model=model,
     instruction=read_prompt("approve-order-prompt.txt"),
-    tools=[approve_order],
+    tools=[update_order_status_tool],
 )
 
 # --- Main Shipping Agent ---
