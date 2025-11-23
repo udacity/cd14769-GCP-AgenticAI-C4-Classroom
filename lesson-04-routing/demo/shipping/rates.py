@@ -3,7 +3,8 @@
 SHIPPING_RATES = {
     "standard": 5.00,
     "express": 10.00,
-    "international": 20.00
+    "international": 20.00,
+    "free": 0.00
 }
 
 TAX_RATES = {

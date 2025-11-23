@@ -1,7 +1,9 @@
 import os
 from pydantic import BaseModel, Field
-from typing import Optional
-from google.adk.agents import Agent, SequentialAgent, ParallelAgent, LlmAgent
+from typing import Optional, AsyncGenerator
+from google.adk.agents import Agent, SequentialAgent, ParallelAgent, LlmAgent, InvocationContext, BaseAgent
+from google.adk.events import Event
+from google.adk.tools.tool_context import ToolContext
 from .order_data import orders, OrderStatus
 from .rates import SHIPPING_RATES, TAX_RATES
 from .products import products
@@ -47,8 +49,9 @@ class PlaceOrderOutput(BaseModel):
 
 # --- Tools ---
 
-def place_order(order_id: str, address: dict):
+def place_order(order_id: str, address: dict, tool_context: ToolContext ):
     """Places an order by adding the shipping address and setting status to PLACED.
+    Also saves the order being worked on in the session state
 
     Args:
         order_id: The ID of the order.
@@ -63,9 +66,8 @@ def place_order(order_id: str, address: dict):
         return {"error": "Order already has a status set"}
 
     order["address"] = address
-    # NOTE: Removed setting status to PLACED here, as requested by user implicit logic 
-    # (approve_order will do it).
-    
+    tool_context.state["order"] = order
+
     return {
         "cart": order.get("cart"),
         "address": order.get("address"),
@@ -105,6 +107,14 @@ def calculate_taxes_cost(order_id: str, state: str) -> dict:
     tax_amount = subtotal * rate
     return {"tax_amount": round(tax_amount, 2), "state": state, "subtotal": subtotal}
 
+def compute_subtotal(order) -> float:
+    subtotal = 0.0
+    cart_items = order.get("cart", [])
+    for product_id in cart_items:
+        if product_id in products:
+            subtotal += products[product_id]["price"]
+    return subtotal
+
 def compute_order_cost(order_id: str, shipping_cost: float, tax_amount: float) -> dict:
     """Compute the order cost by adding shipping and taxes, and updates the order.
 
@@ -117,13 +127,7 @@ def compute_order_cost(order_id: str, shipping_cost: float, tax_amount: float) -
         return {"error": f"Order {order_id} not found."}
 
     order = orders[order_id]
-    
-    subtotal = 0.0
-    cart_items = order.get("cart", [])
-    for product_id in cart_items:
-        if product_id in products:
-            subtotal += products[product_id]["price"]
-
+    subtotal = compute_subtotal(order)
     total_cost = subtotal + shipping_cost + tax_amount
     
     order["shipping_cost"] = shipping_cost
@@ -170,6 +174,49 @@ shipping_cost_agent = LlmAgent(
     output_schema=ShippingCostOutput,
 )
 
+free_shipping_agent = LlmAgent(
+    name="free_shipping_agent",
+    description="Calculates shipping cost for free shipping eligible orders.",
+    model=model,
+    instruction=read_prompt("free-shipping-prompt.txt"),
+    tools=[calculate_shipping_cost],
+    output_schema=ShippingCostOutput,
+)
+
+class ShippingRouter(BaseAgent):
+
+    free_threshold: float
+    free_agent: Agent
+    standard_agent: Agent
+
+    def __init__(self, name: str, free_agent: Agent, standard_agent: Agent, free_threshold: float):
+      super().__init__(
+          name=name,
+          free_threshold=free_threshold,
+          free_agent=free_agent,
+          standard_agent=standard_agent,
+      )
+
+    async def _run_async_impl(self, context: InvocationContext) -> AsyncGenerator[Event, None]:
+      order = context.session.state.get("order")
+      subtotal = compute_subtotal(order)
+      is_free = subtotal >= self.free_threshold
+
+      if is_free:
+          subagent = self.free_agent
+      else:
+          subagent = self.standard_agent
+
+      async for event in subagent.run_async(context):
+          yield event
+
+shipping_router_agent = ShippingRouter(
+    name="shipping_router_agent",
+    free_agent=free_shipping_agent,
+    standard_agent=shipping_cost_agent,
+    free_threshold=100.00,
+)
+
 taxes_cost_agent = LlmAgent(
     name="taxes_cost_agent",
     description="Calculates the tax amount for an order based on the destination state.",
@@ -182,7 +229,7 @@ taxes_cost_agent = LlmAgent(
 costs_agent = ParallelAgent(
     name="other_costs_agent",
     description="Calculates shipping and taxes in parallel.",
-    sub_agents=[shipping_cost_agent, taxes_cost_agent],
+    sub_agents=[shipping_router_agent, taxes_cost_agent],
 )
 
 compute_order_agent = LlmAgent(
