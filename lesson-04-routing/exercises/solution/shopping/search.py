@@ -73,19 +73,19 @@ class SearchRouter(BaseAgent):
 
     agent_a: Agent
     agent_b: Agent
-    threshold: float
+    agent_b_rate: float
 
-    def __init__(self, name: str, agent_a: Agent, agent_b: Agent, threshold: float = 0.5):
+    def __init__(self, name: str, agent_a: Agent, agent_b: Agent, agent_b_rate: float = 0.5):
         super().__init__(
             name=name,
             agent_a=agent_a,
             agent_b=agent_b,
-            threshold=threshold
+            agent_b_rate=agent_b_rate
         )
 
     async def _run_async_impl(self, context: InvocationContext) -> AsyncGenerator[Event, None]:
         # Simple random routing
-        if random.random() < (1-self.threshold):
+        if random.random() < (1-self.agent_b_rate):
             selected_agent = self.agent_a
         else:
             selected_agent = self.agent_b
@@ -99,5 +99,5 @@ search_agent = SearchRouter(
     name="search_agent_router",
     agent_a=search_agent_exact,
     agent_b=search_agent_broad,
-    threshold=0.5
+    agent_b_rate=0.5
 )
