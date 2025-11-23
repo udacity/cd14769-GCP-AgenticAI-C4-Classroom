@@ -1,0 +1,72 @@
+sources:
+  orders:
+    kind: mysql
+    host: ${MYSQL_HOST}
+    port: ${MYSQL_PORT:3306}
+    database: storefront
+    user: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
+tools:
+  get-order:
+    kind: mysql-sql
+    source: storefront
+    description: Retrieve an order by its ID.
+    parameters:
+      - name: order_id
+        type: integer
+        description: The ID of the order to retrieve.
+    statement: SELECT * FROM orders WHERE order_id = ?
+  get-open-orders-by-user:
+    kind: mysql-sql
+    source: storefront
+    description: Retrieve all open orders (orders without a status) for a specific user.
+    parameters:
+      - name: user_id
+        type: string
+        description: The ID of the user.
+    statement: SELECT * FROM orders WHERE user_id = ? AND order_status IS NULL
+  update-order-address:
+    kind: mysql-sql
+    source: storefront
+    description: Update the shipping address for an order.
+    parameters:
+      - name: order_id
+        type: integer
+        description: The ID of the order to update.
+      - name: address
+        type: string
+        description: The address as a JSON string.
+    statement: UPDATE orders SET address = ? WHERE order_id = ?
+  update-order-status:
+    kind: mysql-sql
+    source: storefront
+    description: Update the status of an order.
+    parameters:
+      - name: order_id
+        type: integer
+        description: The ID of the order to update.
+      - name: status
+        type: string
+        description: The new status of the order.
+    statement: UPDATE orders SET order_status = ? WHERE order_id = ?
+  update-order-costs:
+    kind: mysql-sql
+    source: storefront
+    description: Update the costs and status of an order.
+    parameters:
+      - name: order_id
+        type: integer
+        description: The ID of the order to update.
+      - name: shipping_cost
+        type: float
+        description: The calculated shipping cost.
+      - name: tax_amount
+        type: float
+        description: The calculated tax amount.
+      - name: total_cost
+        type: float
+        description: The total cost of the order.
+      - name: status
+        type: string
+        description: The new status of the order.
+    statement: UPDATE orders SET shipping_cost = ?, tax_amount = ?, total_cost = ?, order_status = ? WHERE order_id = ?
