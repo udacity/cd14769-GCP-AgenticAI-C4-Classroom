@@ -70,3 +70,36 @@ tools:
         type: integer
         description: The ID of the order to update.
     statement: UPDATE orders SET shipping_cost = ?, tax_amount = ?, total_cost = ?, order_status = ? WHERE order_id = ?
+  create-order:
+    kind: mysql-sql
+    source: storefront
+    description: Create a new order for a user and return its ID.
+    parameters:
+      - name: user_id
+        type: string
+        description: The ID of the user creating the order.
+    statement: INSERT INTO orders (user_id, cart, order_status) VALUES (?, '[]', NULL); SELECT LAST_INSERT_ID() AS order_id;
+  update-order-cart:
+    kind: mysql-sql
+    source: storefront
+    description: Update the cart items for an order.
+    parameters:
+      - name: cart
+        type: string
+        description: The cart items as a JSON string.
+      - name: order_id
+        type: integer
+        description: The ID of the order to update.
+    statement: UPDATE orders SET cart = CAST(? AS JSON) WHERE order_id = ?
+  add-item-to-cart:
+    kind: mysql-sql
+    source: storefront
+    description: Add an item to the cart of an order.
+    parameters:
+      - name: item_id
+        type: string
+        description: The ID of the item to add.
+      - name: order_id
+        type: integer
+        description: The ID of the order to update.
+    statement: UPDATE orders SET cart = JSON_ARRAY_APPEND(cart, '$', ?) WHERE order_id = ?
