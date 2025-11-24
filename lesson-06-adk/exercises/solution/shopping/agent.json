@@ -1,0 +1,25 @@
+{
+  "name": "shopping",
+  "url": "http://localhost:8000/a2a/shopping",
+  "description": "Agent that manages shopping carts and product searches",
+  "version": "1.0.0",
+  "defaultInputModes": ["text/plain"],
+  "defaultOutputModes": ["text/plain"],
+  "capabilities": {
+    "streaming": false,
+    "functions": true
+  },
+  "skills": [
+    {
+      "id": "shopping_manager",
+      "name": "Shopping Manager",
+      "description": "Manage shopping cart and find products",
+      "tags": ["Shopping", "Cart", "Search"],
+      "examples": [
+        "Find headphones",
+        "Add P001 to my cart",
+        "What is in my cart?"
+      ]
+    }
+  ]
+}
