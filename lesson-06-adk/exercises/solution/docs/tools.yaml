@@ -78,7 +78,7 @@ tools:
       - name: user_id
         type: string
         description: The ID of the user creating the order.
-    statement: INSERT INTO orders (user_id, cart, order_status) VALUES (?, '[]', NULL); SELECT LAST_INSERT_ID() AS order_id;
+    statement: INSERT INTO orders (user_id, cart, order_status) VALUES (?, '[]', NULL);
   update-order-cart:
     kind: mysql-sql
     source: storefront
