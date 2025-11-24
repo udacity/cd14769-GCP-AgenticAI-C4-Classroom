@@ -138,49 +138,6 @@ shipping_cost_agent = LlmAgent(
     output_schema=ShippingCostOutput,
 )
 
-free_shipping_agent = LlmAgent(
-    name="free_shipping_agent",
-    description="Calculates shipping cost for free shipping eligible orders.",
-    model=model,
-    instruction=read_prompt("free-shipping-prompt.txt"),
-    tools=[calculate_shipping_cost],
-    output_schema=ShippingCostOutput,
-)
-
-class ShippingRouter(BaseAgent):
-
-    free_threshold: float
-    free_agent: Agent
-    standard_agent: Agent
-
-    def __init__(self, name: str, free_agent: Agent, standard_agent: Agent, free_threshold: float):
-      super().__init__(
-          name=name,
-          free_threshold=free_threshold,
-          free_agent=free_agent,
-          standard_agent=standard_agent,
-      )
-
-    async def _run_async_impl(self, context: InvocationContext) -> AsyncGenerator[Event, None]:
-      order = context.session.state.get("order")
-      subtotal = compute_subtotal(order)
-      is_free = subtotal >= self.free_threshold
-
-      if is_free:
-          subagent = self.free_agent
-      else:
-          subagent = self.standard_agent
-
-      async for event in subagent.run_async(context):
-          yield event
-
-shipping_router_agent = ShippingRouter(
-    name="shipping_router_agent",
-    free_agent=free_shipping_agent,
-    standard_agent=shipping_cost_agent,
-    free_threshold=100.00,
-)
-
 taxes_cost_agent = LlmAgent(
     name="taxes_cost_agent",
     description="Calculates the tax amount for an order based on the destination state.",
@@ -193,7 +150,7 @@ taxes_cost_agent = LlmAgent(
 costs_agent = ParallelAgent(
     name="other_costs_agent",
     description="Calculates shipping and taxes in parallel.",
-    sub_agents=[shipping_router_agent, taxes_cost_agent],
+    sub_agents=[shipping_cost_agent, taxes_cost_agent],
 )
 
 compute_order_agent = LlmAgent(

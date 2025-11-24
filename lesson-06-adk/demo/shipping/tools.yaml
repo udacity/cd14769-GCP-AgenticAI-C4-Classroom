@@ -42,21 +42,18 @@ tools:
     source: storefront
     description: Update the status of an order.
     parameters:
-      - name: order_id
-        type: integer
-        description: The ID of the order to update.
       - name: status
         type: string
         description: The new status of the order.
+      - name: order_id
+        type: integer
+        description: The ID of the order to update.
     statement: UPDATE orders SET order_status = ? WHERE order_id = ?
   update-order-costs:
     kind: mysql-sql
     source: storefront
     description: Update the costs and status of an order.
     parameters:
-      - name: order_id
-        type: integer
-        description: The ID of the order to update.
       - name: shipping_cost
         type: float
         description: The calculated shipping cost.
@@ -69,4 +66,7 @@ tools:
       - name: status
         type: string
         description: The new status of the order.
+      - name: order_id
+        type: integer
+        description: The ID of the order to update.
     statement: UPDATE orders SET shipping_cost = ?, tax_amount = ?, total_cost = ?, order_status = ? WHERE order_id = ?
