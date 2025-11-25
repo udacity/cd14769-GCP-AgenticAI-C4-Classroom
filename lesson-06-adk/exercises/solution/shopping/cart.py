@@ -1,4 +1,5 @@
 import os
+import logging
 from google.adk.agents import Agent, SequentialAgent, ParallelAgent, LlmAgent
 from google.adk.tools import ToolContext
 from toolbox_core import ToolboxSyncClient
@@ -7,6 +8,7 @@ from .products import products
 from .inventory import inventory_data_agent
 
 model = "gemini-2.5-flash"
+logger = logging.getLogger(__name__)
 
 def read_prompt(filename):
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -28,6 +30,10 @@ get_open_order_for_user_tool = db_client.load_tool("get-open-order-for-user")
 
 def get_user_id(tool_context: ToolContext):
     """Returns the user ID for the current session."""
+    logger.info(f"********** ToolContext in get_user_id: {tool_context}")
+    logger.info(f"********** InvocationContext in get_user_id: {tool_context._invocation_context}")
+    logger.info(f"********** Session in get_user_id: {tool_context.session}")
+    logger.info(f"********** UserContent in get_user_id: {tool_context.user_content}")
     return {
         "user_id": tool_context.session.user_id
     }
