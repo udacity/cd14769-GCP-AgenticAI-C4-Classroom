@@ -167,7 +167,7 @@ place_order_agent = LlmAgent(
     description="Handles the initial placement of an order by setting the address.",
     model=model,
     instruction=read_prompt("place-order-prompt.txt"),
-    tools=[get_user, get_open_order_tool, update_order_address_tool],
+    tools=[get_user, get_order_tool, get_open_order_tool, update_order_address_tool],
     output_schema=PlaceOrderOutput,
 )
 

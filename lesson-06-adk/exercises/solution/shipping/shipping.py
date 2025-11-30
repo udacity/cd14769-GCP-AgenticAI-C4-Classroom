@@ -1,6 +1,5 @@
 import os
 import json
-import logging
 from pydantic import BaseModel, Field
 from typing import Optional, AsyncGenerator, List
 from google.adk.agents import Agent, SequentialAgent, ParallelAgent, LlmAgent, InvocationContext, BaseAgent
@@ -20,7 +19,6 @@ class OrderStatus(Enum):
     RECEIVED = "received"
 
 model = "gemini-2.5-flash"
-logger = logging.getLogger(__name__)
 
 def read_prompt(filename):
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -73,11 +71,6 @@ class PlaceOrderOutput(BaseModel):
 # --- Tools ---
 
 def get_user(tool_context: ToolContext):
-    logger.info(f"********** ToolContext in get_user: {tool_context}")
-    logger.info(f"********** InvocationContext in get_user: {tool_context._invocation_context}")
-    logger.info(f"********** Session in get_user: {tool_context.session}")
-    logger.info(f"********** UserContent in get_user: {tool_context.user_content}")
-
     return {
         "user_id": tool_context.session.user_id,
     }
@@ -174,7 +167,7 @@ place_order_agent = LlmAgent(
     description="Handles the initial placement of an order by setting the address.",
     model=model,
     instruction=read_prompt("place-order-prompt.txt"),
-    tools=[get_user, get_open_order_tool, update_order_address_tool],
+    tools=[get_user, get_order_tool, get_open_order_tool, update_order_address_tool],
     output_schema=PlaceOrderOutput,
 )
 
