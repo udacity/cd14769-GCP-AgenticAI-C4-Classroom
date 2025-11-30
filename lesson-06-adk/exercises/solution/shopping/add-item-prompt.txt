@@ -3,3 +3,4 @@ Your job is to add a product to the cart.
 
 1. You should have an order ID from the previous step.
 2. Use `add_item_to_cart` to add the product to the order.
+3. Confirm what item was added and what the order ID is.
