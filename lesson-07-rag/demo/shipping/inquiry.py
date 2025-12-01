@@ -1,6 +1,7 @@
 import os
 from google.adk.agents import Agent
 from toolbox_core import ToolboxSyncClient
+from .datastore import datastore_search_tool
 
 model = "gemini-2.5-flash"
 
@@ -24,5 +25,5 @@ inquiry_agent = Agent(
     description="Handles questions about shipping policies and tracking.",
     model=model,
     instruction=inquiry_instruction,
-    tools=[get_order_tool],
+    tools=[get_order_tool, datastore_search_tool],
 )
