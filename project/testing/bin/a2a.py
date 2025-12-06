@@ -15,8 +15,11 @@ def output_manager(out, formats):
             for fmt in formats:
                 handles[fmt] = sys.stdout
         else:
-            for fmt in formats:
-                handles[fmt] = stack.enter_context(open(f"{out}.{fmt}", 'w'))
+            if len(formats) == 1:
+                handles[formats[0]] = stack.enter_context(open(out, 'w'))
+            else:
+                for fmt in formats:
+                    handles[fmt] = stack.enter_context(open(f"{out}.{fmt}", 'w'))
         yield handles
     finally:
         stack.close()
@@ -44,17 +47,28 @@ def output_csv(response, fh, request_payload):
 def output_txt(response, fh, request_payload):
     response.raise_for_status()
     data = response.json()
+    
+    prompt_text = "N/A"
+    if request_payload and "params" in request_payload and "message" in request_payload["params"] and \
+       "parts" in request_payload["params"]["message"] and len(request_payload["params"]["message"]["parts"]) > 0 and \
+       "text" in request_payload["params"]["message"]["parts"][0]:
+        prompt_text = request_payload["params"]["message"]["parts"][0]["text"]
+
+    output_text = ""
     try:
         if "result" in data and "artifacts" in data["result"] and len(data["result"]["artifacts"]) > 0:
             artifact = data["result"]["artifacts"][0]
-            text = "".join(part["text"] for part in artifact["parts"])
-            fh.write(text + "\n")
+            output_text = "".join(part["text"] for part in artifact["parts"])
         else:
-            # Fallback for other responses or errors
-            fh.write(str(data) + "\n")
+            output_text = str(data) # Fallback for other responses or errors
     except Exception as e:
-        fh.write(f"Error parsing response: {str(e)}\n")
+        output_text = f"Error parsing response: {str(e)}"
 
+    fh.write("---" * 10 + "\n")
+    fh.write(f"Prompt:\n {prompt_text}\n")
+    fh.write("\n")
+    fh.write(f"Response:\n {output_text}\n")
+    fh.write("\n")
 
 def process_response(response, handles, request_payload=None):
     for fmt, fh in handles.items():
@@ -64,6 +78,8 @@ def process_response(response, handles, request_payload=None):
             if request_payload:
                 output_csv(response, fh, request_payload)
             else:
+                # For card requests, CSV output might not be applicable or needs a different format
+                # For now, we'll just output a simple message. This should not happen for card requests with prompt, as request_payload will be None
                 writer = csv.writer(fh)
                 writer.writerow(["card_request", "success"])
         elif fmt == 'txt':
@@ -83,6 +99,9 @@ def handle_prompt_request(url, prompt, task=None, context=None, message=None, ha
         message_id = message
     else:
         message_id = datetime.now().isoformat()
+
+    print(f"Running test with message ID: {message_id}", file=sys.stderr)
+
     message_data = {
         "role": "user",
         "messageId": message_id,
