@@ -13,3 +13,6 @@ http://localhost:8000/a2a/manager,"I'm looking to buy a new house for about $500
 http://localhost:8000/a2a/manager,"Hey, I think I can get a good deal on a car for $10,000. Can I borrow that much?",msg-010-1,,thread-010
 http://localhost:8000/a2a/manager,"When is my next auto payment due?",msg-011-1,,thread-011
 http://localhost:8000/a2a/manager,"How much do I still owe on my personal loan?",msg-012-1,,thread-012
+http://localhost:8000/a2a/manager,"Do I have any outstanding loans?",msg-013-1,,thread-013
+http://localhost:8000/a2a/manager,"Give me a summary of my financial situation.",msg-014-1,,thread-014
+http://localhost:8000/a2a/manager,"What is the total balance across all my accounts and what loans do I have?",msg-015-1,,thread-015
