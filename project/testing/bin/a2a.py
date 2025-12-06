@@ -1,67 +1,89 @@
-
 import argparse
 import requests
 import json
 from datetime import datetime
 import sys
-from contextlib import contextmanager
+from contextlib import contextmanager, ExitStack
 import csv
 
 @contextmanager
-def smart_open(filename=None):
-    if filename and filename != '-':
-        fh = open(filename, 'w')
-    else:
-        fh = sys.stdout
-
+def output_manager(out, formats):
+    handles = {}
+    stack = ExitStack()
     try:
-        yield fh
+        if not out or out == '-':
+            for fmt in formats:
+                handles[fmt] = sys.stdout
+        else:
+            for fmt in formats:
+                handles[fmt] = stack.enter_context(open(f"{out}.{fmt}", 'w'))
+        yield handles
     finally:
-        if fh is not sys.stdout:
-            fh.close()
+        stack.close()
 
 def output_json(response, fh):
     response.raise_for_status()
     fh.write(json.dumps(response.json(), indent=2))
+    fh.write('\n')
 
 def output_csv(response, fh, request_payload):
     response.raise_for_status()
     request_id = request_payload.get('id')
 
     data = response.json()
-    artifact = data["result"]["artifacts"][0]
-    text = "".join(part["text"] for part in artifact["parts"])
+    try:
+        artifact = data["result"]["artifacts"][0]
+        text = "".join(part["text"] for part in artifact["parts"])
+        
+        writer = csv.writer(fh)
+        writer.writerow([request_id, text])
+    except (KeyError, IndexError, TypeError):
+        writer = csv.writer(fh)
+        writer.writerow([request_id, "Error: Unexpected response format"])
 
-    writer = csv.writer(fh)
-    writer.writerow([request_id, text])
-
-def process_response(response, fh, out_format, request_payload=None):
-    if out_format == 'json':
-        output_json(response, fh)
-    elif out_format == 'csv':
-        if request_payload:
-            output_csv(response, fh, request_payload)
+def output_txt(response, fh, request_payload):
+    response.raise_for_status()
+    data = response.json()
+    try:
+        if "result" in data and "artifacts" in data["result"] and len(data["result"]["artifacts"]) > 0:
+            artifact = data["result"]["artifacts"][0]
+            text = "".join(part["text"] for part in artifact["parts"])
+            fh.write(text + "\n")
         else:
-            # For card requests, CSV output might not be applicable or needs a different format
-            # For now, we'll just output a simple message
-            writer = csv.writer(fh)
-            writer.writerow(["card_request", "success"])
+            # Fallback for other responses or errors
+            fh.write(str(data) + "\n")
+    except Exception as e:
+        fh.write(f"Error parsing response: {str(e)}\n")
 
-def handle_card_request(url, fh, out_format='json'):
+
+def process_response(response, handles, request_payload=None):
+    for fmt, fh in handles.items():
+        if fmt == 'json':
+            output_json(response, fh)
+        elif fmt == 'csv':
+            if request_payload:
+                output_csv(response, fh, request_payload)
+            else:
+                writer = csv.writer(fh)
+                writer.writerow(["card_request", "success"])
+        elif fmt == 'txt':
+            output_txt(response, fh, request_payload)
+
+def handle_card_request(url, handles):
     card_suffix = ".well-known/agent-card.json"
     if not url.endswith(card_suffix):
         if not url.endswith("/"):
             url += "/"
         url += card_suffix
     response = requests.get(url)
-    process_response(response, fh, out_format)
+    process_response(response, handles)
 
-def handle_prompt_request(url, prompt, task=None, context=None, message=None, fh=sys.stdout, out_format='json'):
+def handle_prompt_request(url, prompt, task=None, context=None, message=None, handles={}):
     if message:
         message_id = message
     else:
         message_id = datetime.now().isoformat()
-    message = {
+    message_data = {
         "role": "user",
         "messageId": message_id,
         "parts": [
@@ -72,27 +94,31 @@ def handle_prompt_request(url, prompt, task=None, context=None, message=None, fh
         ],
     }
     if task:
-        message["taskId"] = task
+        message_data["taskId"] = task
     if context:
-        message["contextId"] = context
+        message_data["contextId"] = context
 
     payload = {
         "jsonrpc": "2.0",
         "id": message_id,
         "method": "message/send",
         "params": {
-            "message": message
+            "message": message_data
         }
     }
     response = requests.post(url, json=payload)
-    process_response(response, fh, out_format, payload)
+    process_response(response, handles, payload)
 
-def handle_infile(infile, fh, out_format='csv'):
+def handle_infile(infile, handles):
     input_stream = open(infile, 'r') if infile != '-' else sys.stdin
     reader = csv.reader(input_stream)
     for row in reader:
-        url, prompt, message, task, context = row
-        handle_prompt_request(url, prompt, task or None, context or None, message or None, fh, out_format)
+        if len(row) >= 2:
+            url, prompt = row[0], row[1]
+            message = row[2] if len(row) > 2 else None
+            task = row[3] if len(row) > 3 else None
+            context = row[4] if len(row) > 4 else None
+            handle_prompt_request(url, prompt, task or None, context or None, message or None, handles)
     if input_stream is not sys.stdin:
         input_stream.close()
 
@@ -106,7 +132,7 @@ def main():
     parser.add_argument('--message', type=str, help='An optional message id.')
     parser.add_argument('--out', type=str, help='The output file, or - for stdout.')
     parser.add_argument('--in', dest='infile', type=str, help='A CSV file to process, or - for stdin.')
-    parser.add_argument('--format', choices=['json', 'csv'], default='json', help='The output format.')
+    parser.add_argument('--format', nargs='+', choices=['json', 'csv', 'txt'], help='The output format(s).')
 
     args = parser.parse_args()
 
@@ -118,7 +144,14 @@ def main():
     message = args.message
     out = args.out
     infile = args.infile
-    out_format = args.format
+    
+    # Logic for format defaulting
+    if args.format:
+        out_formats = args.format
+    elif out and out != '-':
+        out_formats = ['json', 'csv', 'txt']
+    else:
+        out_formats = ['json']
 
     num_args = sum([1 for arg in [infile, card, prompt] if arg])
     if num_args > 1:
@@ -127,14 +160,14 @@ def main():
     if (card or prompt) and not url:
         parser.error("--url is required when using --card or --prompt.")
 
-    with smart_open(out) as fh:
+    with output_manager(out, out_formats) as handles:
         try:
             if infile:
-                handle_infile(infile, fh, out_format)
+                handle_infile(infile, handles)
             elif card:
-                handle_card_request(url, fh, out_format)
+                handle_card_request(url, handles)
             elif prompt:
-                handle_prompt_request(url, prompt, task, context, message, fh, out_format)
+                handle_prompt_request(url, prompt, task, context, message, handles)
         except requests.exceptions.RequestException as e:
             print(f"An error occurred: {e}")
 
