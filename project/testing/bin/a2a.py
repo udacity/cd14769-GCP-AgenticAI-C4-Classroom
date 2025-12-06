@@ -26,8 +26,7 @@ def output_manager(out, formats):
 
 def output_json(response, fh):
     response.raise_for_status()
-    fh.write(json.dumps(response.json(), indent=2))
-    fh.write('\n')
+    fh.write(json.dumps(response.json()) + '\n')
 
 def output_csv(response, fh, request_payload):
     response.raise_for_status()
@@ -64,7 +63,7 @@ def output_txt(response, fh, request_payload):
     except Exception as e:
         output_text = f"Error parsing response: {str(e)}"
 
-    fh.write("---" * 10 + "\n")
+    fh.write("--- " * 10 + "\n")
     fh.write(f"Prompt:\n {prompt_text}\n")
     fh.write("\n")
     fh.write(f"Response:\n {output_text}\n")
@@ -131,12 +130,27 @@ def handle_prompt_request(url, prompt, task=None, context=None, message=None, ha
 def handle_infile(infile, handles):
     input_stream = open(infile, 'r') if infile != '-' else sys.stdin
     reader = csv.reader(input_stream)
+    
+    last_thread_key = None
+
     for row in reader:
         if len(row) >= 2:
             url, prompt = row[0], row[1]
             message = row[2] if len(row) > 2 else None
             task = row[3] if len(row) > 3 else None
             context = row[4] if len(row) > 4 else None
+            
+            # Logic for Thread Header
+            if 'txt' in handles:
+                current_thread_key = (url, context)
+                if current_thread_key != last_thread_key:
+                    fh = handles['txt']
+                    fh.write("\n" + "=" * 40 + "\n")
+                    fh.write(f"Thread ID: {context}\n")
+                    fh.write(f"URL: {url}\n")
+                    fh.write("=" * 40 + "\n\n")
+                    last_thread_key = current_thread_key
+
             handle_prompt_request(url, prompt, task or None, context or None, message or None, handles)
     if input_stream is not sys.stdin:
         input_stream.close()
