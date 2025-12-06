@@ -2,7 +2,6 @@ import os
 from google.adk.agents import Agent, SequentialAgent, ParallelAgent, LlmAgent
 from google.adk.tools import ToolContext
 
-from .products import products
 from .order_data import orders, OrderStatus, get_next_order_id
 from .inventory import inventory_data_agent
 
@@ -39,9 +38,6 @@ def add_to_cart(product_id: str, tool_context: ToolContext):
     Args:
         product_id: The ID of the product to add.
     """
-    if product_id not in products:
-        return {"error": "Product ID not found"}
-
     # We assume get_order has run and set the state
     order_id = tool_context.state.get("order_id")
     if not order_id:
@@ -55,7 +51,7 @@ def add_to_cart(product_id: str, tool_context: ToolContext):
         return {"error": f"Order {order_id} cannot be modified as its status is already set to {order['order_status'].value}"}
 
     order["cart"].append(product_id)
-    return {"status": "success", "message": f"Added {products[product_id]['name']} to cart.", "cart": order["cart"]}
+    return {"status": "success", "message": f"Added {product_id} to cart.", "cart": order["cart"]}
 
 # --- Sub-Agents ---
 

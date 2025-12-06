@@ -3,6 +3,7 @@ from google.adk.agents import Agent
 from .search import search_agent
 from .inventory import inventory_agent
 from .cart import cart_agent
+from .product_info import product_qa_agent
 
 model = "gemini-2.5-flash"
 
@@ -19,5 +20,5 @@ root_agent = Agent(
     description="Orchestrates the shopping experience.",
     model=model,
     instruction=orchestrator_instruction,
-    sub_agents=[search_agent, inventory_agent, cart_agent],
+    sub_agents=[search_agent, inventory_agent, cart_agent, product_qa_agent],
 )

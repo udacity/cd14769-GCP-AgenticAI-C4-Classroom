@@ -1,7 +1,6 @@
 import os
 from pydantic import BaseModel, Field
 from google.adk.agents import Agent, LlmAgent
-from .products import products, product_counts
 
 model = "gemini-2.5-flash"
 
@@ -11,17 +10,7 @@ def read_prompt(filename):
     with open(file_path, "r") as f:
         return f.read()
 
-def check_inventory(product_id: str):
-    """Checks if a product is in stock.
-
-    Args:
-        product_id: The ID of the product to check.
-    """
-    if product_id in products:
-        count = product_counts.get(product_id, 0)
-        return {"product_id": product_id, "in_stock": count > 0, "count": count}
-    else:
-        return {"error": "Product ID not found"}
+# TODO - Connect to Toolbox and load the tool
 
 inventory_instruction = read_prompt("inventory-prompt.txt")
 
@@ -30,7 +19,7 @@ inventory_agent = Agent(
     description="Checks product inventory availability.",
     model=model,
     instruction=inventory_instruction,
-    tools=[check_inventory],
+    tools=[], # TODO - add tool
 )
 
 class InventoryData(BaseModel):
@@ -43,6 +32,6 @@ inventory_data_agent = LlmAgent(
     description="Checks product inventory and returns structured data.",
     model=model,
     instruction="Check the inventory for the given product ID and return the details.",
-    tools=[check_inventory],
+    tools=[], # TODO - add tool
     output_schema=InventoryData
 )

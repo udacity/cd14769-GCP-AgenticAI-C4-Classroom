@@ -1,7 +1,7 @@
 import os
 from pydantic import BaseModel, Field
 from google.adk.agents import Agent, LlmAgent
-from .products import products, product_counts
+from toolbox_core import ToolboxSyncClient
 
 model = "gemini-2.5-flash"
 
@@ -11,17 +11,14 @@ def read_prompt(filename):
     with open(file_path, "r") as f:
         return f.read()
 
-def check_inventory(product_id: str):
-    """Checks if a product is in stock.
+# Connect to Toolbox
+toolbox_url = os.environ.get("TOOLBOX_URL", "http://127.0.0.1:5001")
+print(f"Connecting to Toolbox at {toolbox_url}")
+db_client = ToolboxSyncClient(toolbox_url)
 
-    Args:
-        product_id: The ID of the product to check.
-    """
-    if product_id in products:
-        count = product_counts.get(product_id, 0)
-        return {"product_id": product_id, "in_stock": count > 0, "count": count}
-    else:
-        return {"error": "Product ID not found"}
+# Load the tool from the toolbox (MCP)
+# Assumes a tool named "check-inventory" exists in the toolbox configuration
+check_inventory_tool = db_client.load_tool("check-inventory")
 
 inventory_instruction = read_prompt("inventory-prompt.txt")
 
@@ -30,7 +27,7 @@ inventory_agent = Agent(
     description="Checks product inventory availability.",
     model=model,
     instruction=inventory_instruction,
-    tools=[check_inventory],
+    tools=[check_inventory_tool],
 )
 
 class InventoryData(BaseModel):
@@ -43,6 +40,6 @@ inventory_data_agent = LlmAgent(
     description="Checks product inventory and returns structured data.",
     model=model,
     instruction="Check the inventory for the given product ID and return the details.",
-    tools=[check_inventory],
+    tools=[check_inventory_tool],
     output_schema=InventoryData
 )

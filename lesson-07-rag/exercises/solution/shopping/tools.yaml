@@ -1,0 +1,27 @@
+sources:
+  storefront:
+    kind: mysql
+    host: ${MYSQL_HOST}
+    port: ${MYSQL_PORT:3306}
+    database: storefront
+    user: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
+tools:
+  check-inventory:
+    kind: mysql-sql
+    source: storefront
+    description: Check the inventory quantity for a product.
+    parameters:
+      - name: product_id
+        type: string
+        description: The ID of the product.
+    statement: SELECT product_id, (quantity > 0) as in_stock, quantity as count FROM inventory WHERE product_id = ?
+  search-products:
+    kind: mysql-sql
+    source: storefront
+    description: Search for products by name or description.
+    parameters:
+      - name: query
+        type: string
+        description: The search term.
+    statement: SELECT * FROM products WHERE CONCAT(name, ' ', description) LIKE CONCAT('%', ?, '%')

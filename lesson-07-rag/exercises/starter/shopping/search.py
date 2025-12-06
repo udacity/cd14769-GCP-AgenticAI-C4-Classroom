@@ -3,7 +3,6 @@ import random
 from typing import AsyncGenerator
 from google.adk.agents import Agent, LlmAgent, BaseAgent, InvocationContext
 from google.adk.events import Event
-from .products import products
 
 model = "gemini-2.5-flash"
 
@@ -13,35 +12,7 @@ def read_prompt(filename):
     with open(file_path, "r") as f:
         return f.read()
 
-def search_products(query: str):
-    """Searches for products by name or description.
-
-    Args:
-        query: The search query string.
-    """
-    results = []
-    for pid, pdata in products.items():
-        if query.lower() in pdata["name"].lower() or query.lower() in pdata["description"].lower():
-            results.append({"id": pid, "name": pdata["name"], "price": pdata["price"]})
-    return results
-
-def search_products_broad(query: str):
-    """Searches for products matching any word in the query.
-
-    Args:
-        query: The search query string.
-    """
-    results = []
-    words = query.lower().split()
-    for pid, pdata in products.items():
-        name_lower = pdata["name"].lower()
-        desc_lower = pdata["description"].lower()
-        
-        for word in words:
-            if word in name_lower or word in desc_lower:
-                results.append({"id": pid, "name": pdata["name"], "price": pdata["price"]})
-                break # Avoid duplicates if multiple words match
-    return results
+# TODO - Connect to Toolbox and load the tool
 
 search_instruction = read_prompt("search-prompt.txt")
 search_broad_instruction = read_prompt("search-broad-prompt.txt")
