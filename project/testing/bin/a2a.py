@@ -27,6 +27,7 @@ def output_manager(out, formats):
 def output_json(response, fh):
     response.raise_for_status()
     fh.write(json.dumps(response.json()) + '\n')
+    fh.flush()
 
 def output_csv(response, fh, request_payload):
     response.raise_for_status()
@@ -42,6 +43,7 @@ def output_csv(response, fh, request_payload):
     except (KeyError, IndexError, TypeError):
         writer = csv.writer(fh)
         writer.writerow([request_id, "Error: Unexpected response format"])
+    fh.flush()
 
 def output_txt(response, fh, request_payload):
     response.raise_for_status()
@@ -63,11 +65,11 @@ def output_txt(response, fh, request_payload):
     except Exception as e:
         output_text = f"Error parsing response: {str(e)}"
 
-    fh.write("--- " * 10 + "\n")
     fh.write(f"Prompt:\n {prompt_text}\n")
     fh.write("\n")
     fh.write(f"Response:\n {output_text}\n")
     fh.write("\n")
+    fh.flush()
 
 def process_response(response, handles, request_payload=None):
     for fmt, fh in handles.items():
@@ -150,6 +152,8 @@ def handle_infile(infile, handles):
                     fh.write(f"URL: {url}\n")
                     fh.write("=" * 40 + "\n\n")
                     last_thread_key = current_thread_key
+                else:
+                    fh.write("-" * 5 + "\n\n")
 
             handle_prompt_request(url, prompt, task or None, context or None, message or None, handles)
     if input_stream is not sys.stdin:
