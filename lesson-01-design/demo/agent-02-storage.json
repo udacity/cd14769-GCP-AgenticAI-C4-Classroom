@@ -1,0 +1,21 @@
+{
+  "name": "photo_storage",
+  "url": "http://localhost:8002/a2a/storage",
+  "description": "Manages the storage of photo files and metadata.",
+  "version": "0.0.1",
+  "defaultInputModes": ["text/plain"],
+  "defaultOutputModes": ["text/plain"],
+  "capabilities": {
+    "streaming": false,
+    "functions": true
+  },
+  "skills": [
+    {
+      "id": "upload_photo",
+      "name": "Upload Photo",
+      "description": "Save a new photo to storage.",
+      "tags": ["Storage"],
+      "examples": ["Upload this image file"]
+    }
+  ]
+}

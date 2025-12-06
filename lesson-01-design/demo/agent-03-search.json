@@ -1,0 +1,38 @@
+{
+  "name": "photo_search",
+  "url": "http://localhost:8003/a2a/search",
+  "description": "Indexes and searches for photos based on metadata and visual content.",
+  "version": "0.0.1",
+  "defaultInputModes": ["text/plain"],
+  "defaultOutputModes": ["text/plain"],
+  "capabilities": {
+    "streaming": false,
+    "functions": true
+  },
+  "skills": [
+    {
+      "id": "search_photos",
+      "name": "Search Photos",
+      "description": "Find photos matching specific criteria.",
+      "tags": ["Search"],
+      "examples": [
+        "Find photos of dogs",
+        "Search for photos taken in Paris"
+      ]
+    },
+    {
+      "id": "browse_timeline",
+      "name": "Browse Timeline by Date",
+      "description": "Browse photos based on the date of the photo",
+      "tags": ["Browse"],
+      "examples": ["Show me the photos from last month"]
+    },
+    {
+      "id": "view_album",
+      "name": "View Album",
+      "description": "Browse photos in an album",
+      "tags": ["Browse"],
+      "examples": ["Show me the party photos"]
+    }
+  ]
+}

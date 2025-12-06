@@ -1,0 +1,55 @@
+{
+  "name": "shopping",
+  "url": "http://localhost:8004/a2a/shopping",
+  "description": "Manages the shopping experience, including product search, retrieval, and cart management.",
+  "version": "0.0.1",
+  "defaultInputModes": ["text/plain"],
+  "defaultOutputModes": ["text/plain"],
+  "capabilities": {
+    "streaming": false,
+    "functions": true
+  },
+  "skills": [
+    {
+      "id": "search_products",
+      "name": "Search Products",
+      "description": "Search for products based on keywords or criteria.",
+      "tags": ["Shopping", "Search"],
+      "examples": [
+        "Find wireless headphones",
+        "Search for blue t-shirts"
+      ]
+    },
+    {
+      "id": "check_inventory",
+      "name": "Check Inventory",
+      "description": "Check availability of a specific product.",
+      "tags": ["Shopping", "Inventory"],
+      "examples": [
+        "Is product P001 in stock?",
+        "Check inventory for the red dress"
+      ]
+    },
+    {
+      "id": "get_product_info",
+      "name": "Get Product Info",
+      "description": "Retrieve detailed information about a product.",
+      "tags": ["Shopping", "Product"],
+      "examples": [
+        "Show me details for the smartphone stand",
+        "What are the specs for this camera?"
+      ]
+    },
+    {
+      "id": "manage_cart",
+      "name": "Manage Cart",
+      "description": "Add, remove, or view items in the shopping cart.",
+      "tags": ["Shopping", "Cart"],
+      "examples": [
+        "Add headphones to my cart",
+        "Remove the last item",
+        "View my cart"
+      ]
+    }
+  ]
+}

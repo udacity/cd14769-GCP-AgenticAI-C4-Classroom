@@ -1,0 +1,64 @@
+{
+  "name": "photo_edit",
+  "url": "http://localhost:8004/a2a/edit",
+  "description": "Agent that handles photo editing tasks by delegating to specialized sub-agents for resizing, restoration, album creation, animation, and styling.",
+  "version": "0.0.1",
+  "defaultInputModes": ["text/plain"],
+  "defaultOutputModes": ["text/plain"],
+  "capabilities": {
+    "streaming": false,
+    "functions": true
+  },
+  "skills": [
+    {
+      "id": "resize_image",
+      "name": "Resize",
+      "description": "Resize or crop a photo to specific dimensions.",
+      "tags": ["Edit", "Resize"],
+      "examples": [
+        "Resize this to 1024x768",
+        "Crop to a square"
+      ]
+    },
+    {
+      "id": "magic_eraser",
+      "name": "Magic Eraser",
+      "description": "Remove unwanted objects or people from a photo.",
+      "tags": ["Edit", "Restoration"],
+      "examples": [
+        "Remove the stranger in the background",
+        "Erase the power lines"
+      ]
+    },
+    {
+      "id": "create_album",
+      "name": "Album Creator",
+      "description": "Group selected photos into a new album.",
+      "tags": ["Edit", "Album"],
+      "examples": [
+        "Create an album from these vacation photos",
+        "Make a new album named 'Family'"
+      ]
+    },
+    {
+      "id": "animate_photo",
+      "name": "Animator",
+      "description": "Create a short animation or cinematic effect from a still photo.",
+      "tags": ["Edit", "Animation"],
+      "examples": [
+        "Animate this photo",
+        "Make a cinematic video from this image"
+      ]
+    },
+    {
+      "id": "enhance_style",
+      "name": "Enhance / Style",
+      "description": "Apply stylistic filters or auto-enhance image quality.",
+      "tags": ["Edit", "Style", "Filter"],
+      "examples": [
+        "Apply a vintage style",
+        "Auto-enhance this picture"
+      ]
+    }
+  ]
+}

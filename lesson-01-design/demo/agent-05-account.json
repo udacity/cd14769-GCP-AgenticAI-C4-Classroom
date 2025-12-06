@@ -1,0 +1,34 @@
+{
+  "name": "user_account",
+  "url": "http://localhost:8005/a2a/account",
+  "description": "Manages user account settings and notifications.",
+  "version": "0.0.1",
+  "defaultInputModes": ["text/plain"],
+  "defaultOutputModes": ["text/plain"],
+  "capabilities": {
+    "streaming": false,
+    "functions": true
+  },
+  "skills": [
+    {
+      "id": "album_notifications",
+      "name": "Album Notifications",
+      "description": "Handle notifications related to shared albums.",
+      "tags": ["Account", "Notification"],
+      "examples": [
+        "There have been comments on the 'summer' album",
+        "There are new photos in the 'winter' album"
+      ]
+    },
+    {
+      "id": "creation_notifications",
+      "name": "Creation Notifications",
+      "description": "Handle notifications for auto-generated creations (collages, animations).",
+      "tags": ["Account", "Notification"],
+      "examples": [
+        "New collage with ID 12349",
+        "New stylized photo with ID 27420"
+      ]
+    }
+  ]
+}

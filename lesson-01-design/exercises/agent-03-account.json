@@ -1,0 +1,54 @@
+{
+  "name": "user_account",
+  "url": "http://localhost:8003/a2a/account",
+  "description": "Manages user accounts, profiles, subscriptions, and notification preferences within the e-commerce system.",
+  "version": "0.0.1",
+  "defaultInputModes": ["text/plain"],
+  "defaultOutputModes": ["text/plain"],
+  "capabilities": {
+    "streaming": false,
+    "functions": true
+  },
+  "skills": [
+    {
+      "id": "get_user_profile",
+      "name": "Get User Profile",
+      "description": "Retrieves a user's profile information.",
+      "tags": ["Account"],
+      "examples": [
+        "Get John Doe's profile",
+        "What is my email address?"
+      ]
+    },
+    {
+      "id": "update_user_profile",
+      "name": "Update User Profile",
+      "description": "Updates specific fields in a user's profile.",
+      "tags": ["Account"],
+      "examples": [
+        "Update my address to 123 Main St",
+        "Change my phone number"
+      ]
+    },
+    {
+      "id": "manage_subscriptions",
+      "name": "Manage Subscriptions",
+      "description": "Allows users to manage their subscription status or preferences.",
+      "tags": ["Account", "Billing"],
+      "examples": [
+        "Subscribe to premium features",
+        "Cancel my monthly subscription"
+      ]
+    },
+    {
+      "id": "send_notification",
+      "name": "Send Notification",
+      "description": "Sends a notification to the user through their preferred channel.",
+      "tags": ["Account", "Notification"],
+      "examples": [
+        "Send me an email about order updates",
+        "Notify me via SMS"
+      ]
+    }
+  ]
+}

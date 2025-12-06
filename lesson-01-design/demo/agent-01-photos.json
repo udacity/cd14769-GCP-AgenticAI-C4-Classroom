@@ -1,0 +1,25 @@
+{
+  "name": "photos",
+  "url": "http://localhost:8001/a2a/photos",
+  "description": "Main orchestrator agent for the Photos application. Manages user interactions and delegates to specialized agents for storage, search, editing, and account management.",
+  "version": "0.0.1",
+  "defaultInputModes": ["text/plain"],
+  "defaultOutputModes": ["text/plain"],
+  "capabilities": {
+    "streaming": true,
+    "functions": true
+  },
+  "skills": [
+    {
+      "id": "process_request",
+      "name": "Process Request",
+      "description": "Handle a natural language request from the user regarding their photo library.",
+      "tags": ["Photos", "Orchestrator"],
+      "examples": [
+        "Find all my photos of cats",
+        "Edit the last photo to be black and white",
+        "How much storage do I have left?"
+      ]
+    }
+  ]
+}

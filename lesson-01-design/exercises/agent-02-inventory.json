@@ -1,0 +1,34 @@
+{
+  "name": "inventory",
+  "url": "http://localhost:8002/a2a/inventory",
+  "description": "Manages product inventory, including checking stock levels and updating quantities.",
+  "version": "0.0.1",
+  "defaultInputModes": ["text/plain"],
+  "defaultOutputModes": ["text/plain"],
+  "capabilities": {
+    "streaming": false,
+    "functions": true
+  },
+  "skills": [
+    {
+      "id": "check_stock",
+      "name": "Check Stock",
+      "description": "Checks the current stock level for a given product ID.",
+      "tags": ["Inventory"],
+      "examples": [
+        "Check stock for product P001",
+        "Is product P005 available?"
+      ]
+    },
+    {
+      "id": "update_stock",
+      "name": "Update Stock",
+      "description": "Updates the stock level for a given product ID by a specified quantity.",
+      "tags": ["Inventory"],
+      "examples": [
+        "Add 10 units to product P002",
+        "Reduce stock of P001 by 5"
+      ]
+    }
+  ]
+}
