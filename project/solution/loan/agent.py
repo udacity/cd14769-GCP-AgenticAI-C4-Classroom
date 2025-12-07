@@ -25,7 +25,7 @@ sub_agents = [
 
 # Use the Gemini 2.5 Flash model since it performs quickly
 # and handles the processing well.
-model = "gemini-2.5-flash"
+model = "gemini-2.5-pro"
 
 # Create our agent
 root_agent = Agent(

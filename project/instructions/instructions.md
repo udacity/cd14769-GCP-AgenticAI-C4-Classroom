@@ -53,7 +53,10 @@ This should include
     2. From the command line, change directories to where your **`tools.yaml`** file is located.
     3. Make sure the "MYSQL" environment variables are exported in your current command line. If you're using bash, for example, you might do something like `export $(grep -v '^#' .env | xargs)`
     4. Start the server from your command line and add the provided URL to your .env file.
-       `/path/to/toolbox --tools-file "tools.yaml"` If you need to use another port, you can include a `--port` parameter
+       `/path/to/toolbox --tools-files "tools.yaml"` 
+       * If you need to use another port, you can include a `--port` parameter
+       * If there are multiple tools files you wish to use, you can specify 
+         the --tools-files parameter, and filename, multiple times.
     5. Make sure you update the **`.env`** file to include the "TOOLBOX_URL" that points at the URL that the toolbox is listening to. 
 
 ### Part 1: The Basic Deposit Account Agent
@@ -157,7 +160,8 @@ Test this agent:
    the loan or deposit account agent and see how the web test tool indicates 
    it gets routed to those agents.
 2. Make sure you can access the agent card and send an A2A formatted HTTP 
-   POST request using the URL “http://localhost:8000/a2a/manager”.
+   POST request using the `a2a.py` tool with the  URL 
+   “http://localhost:8000/a2a/manager”.
 
 ### Part 4: Adding a Loan Approval Sub-Agent
 
@@ -217,14 +221,24 @@ how the state changes
 ### Part 5: Testing, Evaluating, and Preparing Your Report
 
 You'll be testing your agents against a data set provided in the 
-"test_scenarios.py" file. If you look at the file (and you should), you'll 
+"test_scenarios.csv" file. If you look at the file (and you should), you'll 
 see that it provides prompts, some of them as parts of sessions, that will 
 be sent to the manager endpoint. As you analyse the results, make sure you 
 pay attention to which parts are part of a single session and which are from 
-different sessions.
+different sessions. If you run the tests more than once, you will need to 
+restart the A2A servers to make sure they are not retaining the old sessions.
 
 You can run this using 
-`python a2a.py --in test_scenarios.csv --out test_results.csv --format csv`
+`python a2a.py --in test_scenarios.csv --out test_results`
+
+This will produce three files:
+* "test_results.csv" contains a CSV file with the message ID and response. 
+  This directly matches the entries in the "test_scenarios.csv" file.
+* "test_results.json" contains a list of JSON events, one per line. Each 
+  event contains the JSON results from the corresponding prompt, which are 
+  far more extensive than the text response and can be useful for debugging.
+* "test_results.txt" is a human-readable form for each thread and prompt. It 
+  shows the thread ID, and each request and response for that thread.
 
 You should then prepare a report for the bank's board. This should include:
 - A comprehensive explanation of your multi-agent system.
@@ -249,7 +263,7 @@ submit for review:
     the "manager" agent, so you can see the full interaction and final state.
   * You may also submit screen shots of individual requests and responses at 
     various stages if you feel it will help illustrate how your code works.
-* Your test_results.csv file.
+* Your test_results.txt, test_results.json, and test_results.csv file.
   * You do **not** need to submit your test_scenarios.csv file unless you 
     have made significant additions or changes.
 * Your final report and analysis, which may (but does not have to) include 
