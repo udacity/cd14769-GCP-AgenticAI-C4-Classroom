@@ -3,6 +3,8 @@ import os
 from google.adk.agents import Agent
 from google.adk.sessions import InMemorySessionService
 
+from toolbox_core import ToolboxSyncClient
+
 # Configure short-term session to use the in-memory service
 session_service = InMemorySessionService()
 
@@ -14,6 +16,9 @@ with open(instruction_file_path, "r") as f:
   instruction = f.read()
 
 # Set up the tools that we will be using for the root agent
+toolbox_url = os.environ.get("TOOLBOX_URL", "http://127.0.0.1:5000")
+print(f"Connecting to Toolbox at {toolbox_url}")
+db_client = ToolboxSyncClient( toolbox_url )
 tools=[
   # TODO: Add tools here
 ]
