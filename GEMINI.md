@@ -57,6 +57,9 @@ the following and suggest possible improvements:
 * Make sure there is a `CLASSROOM-README.md` file. This should contain the 
   information outlined below and be detailed and thorough.
 * Make sure there is a `.env-sample` file, created as described below.
+* Agents that are substantially similar to the agent from the previous 
+  lesson should have similar, or identical, prompts to the previous lesson. 
+  If the agent has changed, evaluate the new prompt in light of those changes.
 
 # Building the exercise starter
 
