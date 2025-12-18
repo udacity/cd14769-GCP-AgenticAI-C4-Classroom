@@ -1,6 +1,8 @@
 import os
 from typing import Optional
 from google.adk.agents import Agent, SequentialAgent, ParallelAgent, LlmAgent
+# TODO: Import ToolContext from google.adk.tools
+from google.adk.tools import ToolContext
 
 from .products import products
 from .order_data import orders, OrderStatus, get_next_order_id
@@ -14,43 +16,28 @@ def read_prompt(filename):
     with open(file_path, "r") as f:
         return f.read()
 
-def get_order(order_id: Optional[str] = None):
+# TODO: Update get_order to accept tool_context and use session state
+def get_order(tool_context: ToolContext):
     """
-    Retrieves the order. If no order ID is provided, creates a new one.
-    
-    Args:
-        order_id: Optional existing order ID.
+    Retrieves the order for the current session.
+    If no order exists, creates a new one and saves the ID to state.
     """
-    if order_id is None:
-      order_id = get_next_order_id()
-      orders[order_id] = {
-        "cart": [],
-        "address": None,
-        "order_status": None
-      }
+    # TODO: Check if "order_id" exists in tool_context.state
+    # TODO: If not, generate a new one, save it to state, and initialize the order
+    # TODO: Return the order_id and order object
+    pass
 
-    # Return the order with its ID so the caller knows it
-    return {"order_id": order_id, "order": orders[order_id]}
-
-def add_to_cart(order_id: str, product_id: str):
+# TODO: Update add_to_cart to retrieve order_id from session state
+def add_to_cart(product_id: str, tool_context: ToolContext):
     """Adds a product to the specified order's cart.
 
     Args:
-        order_id: The ID of the order.
         product_id: The ID of the product to add.
     """
-    if product_id not in products:
-        return {"error": "Product ID not found"}
-
-    order_info = get_order(order_id)
-    order = order_info["order"]
-
-    # Check if the order has already been placed or processed
-    if order["order_status"] is not None:
-        return {"error": f"Order {order_id} cannot be modified as its status is already set to {order['order_status'].value}"}
-
-    order["cart"].append(product_id)
-    return {"status": "success", "message": f"Added {products[product_id]['name']} to cart.", "cart": order["cart"]}
+    # TODO: Retrieve order_id from tool_context.state
+    # TODO: Return an error if no active session is found
+    # TODO: Implement adding to cart logic as before
+    pass
 
 # --- Sub-Agents ---
 
