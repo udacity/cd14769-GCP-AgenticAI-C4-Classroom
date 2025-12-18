@@ -1,9 +1,9 @@
 # Implementing Multi-Agent State Coordination with ADK & A2A
 
-We will learn how to build a distributed multi-agent system where agents running 
-as separate services coordinate to fulfill a user's request. We will use the 
-Agent-to-Agent (A2A) protocol for communication and a shared database for 
-state management.
+We will learn how to build a distributed multi-agent system where agents 
+coordinate to fulfill a user's request as part of a shipping system. We will 
+use the Agent-to-Agent (A2A) protocol for communication and a shared 
+database for state management.
 
 ---
 
@@ -11,22 +11,23 @@ state management.
 
 ### What You'll Learn
 
-In previous lessons, all agents ran within a single Python process. In this 
-lesson, we will split the system into two independent services: a **Storefront 
-Agent** (the user interface) and a **Shipping Agent** (the fulfillment 
-backend). You will learn how to connect them using A2A and how they share data 
-using a MySQL database via the MCP Database Toolbox.
+We will split the system into two independent agents: a **Storefront Agent** 
+(the user interface) and a **Shipping Agent** (the fulfillment backend). You 
+will learn how to connect them using A2A and how they share data using a MySQL 
+database via the MCP Database Toolbox.
 
 Learning objectives:
-- Configuring `RemoteA2aAgent` to connect to external services.
+- Configuring `RemoteA2aAgent` to connect to external agents.
 - Defining an Agent Card (`agent.json`) to publish capabilities.
 - Using the MCP Database Toolbox to read/write shared state.
+- Running multiple A2A agents within the ADK environment.
 
 ### Prerequisites
 
 - Understanding of ADK orchestration.
-- Basic familiarity with SQL.
+- Basic familiarity with SQL, Google Cloud SQL, and MCP Database Toolbox
 - Access to Google Cloud with Vertex AI enabled.
+- A running MySQL instance.
 
 ---
 
@@ -43,11 +44,10 @@ source of truth for business data.
 
 1.  **Communication (A2A)**: The Storefront Agent treats the Shipping Agent as 
     a "remote tool". It uses the A2A protocol to discover the Shipping Agent's 
-    capabilities (via its Agent Card) and send requests over HTTP.
+    capabilities (via its Agent Card) and send requests.
 2.  **State (Shared Database)**: Instead of passing massive JSON objects back 
-    and forth or relying on transient session state, both agents connect to a 
-    shared SQL database. The Storefront creates an order in the DB, and the 
-    Shipping Agent reads/updates that same record.
+    and forth or relying on transient session state, agents connect to a 
+    shared SQL database.
 
 ### How It Works
 
@@ -64,7 +64,42 @@ contains the conversation context but effectively hands control over.
 The Shipping Agent receives the request. It uses the `MCP Database Toolbox` 
 to look up the order details from the `orders` table using the user's ID. 
 It processes the shipment, updates the database status to 'SHIPPED', and 
-returns a summary to the Storefront.
+returns a summary to the Storefront. Note that the Storefront Agent *does not* 
+create the order; it assumes the order exists in the shared database (likely 
+populated by a shopping cart service we aren't building in this specific demo).
+
+---
+
+## Infrastructure Setup
+
+### 1. Google Cloud SQL (MySQL)
+
+You need a MySQL database to act as the shared state.
+- Create a MySQL instance in Google Cloud SQL.
+- Create a database and user.
+- Load the schema from `docs/shipping.sql`.
+- Make sure you have added this configuration to your `.env` file.
+
+### 2. Setup MCP Database Toolkit
+
+1. If you have not already done so, download the latest release of the 
+   **Google GenAI Toolbox** (MCP server) for your platform from
+   the [official documentation](https://googleapis.github.io/genai-toolbox/getting-started/introduction/) or GitHub releases.
+2. Make the binary executable (e.g., `chmod +x toolbox`).
+
+### 3. Run the MCP Server
+
+1. Navigate to the directory containing `tools.yaml`.
+2. Export your database credentials from your `.env` file so the server can read
+   them.
+   ```bash
+   export $(grep -v '^#' .env | xargs)
+   ```
+3. Run the toolbox server:
+   ```bash
+   ./toolbox --tools-file tools.yaml --port 5001
+   ```
+4. Update `TOOLBOX_URL` in your `.env` file to `http://127.0.0.1:5001`.
 
 ---
 
@@ -86,8 +121,7 @@ lesson-06-adk/demo/
 
 ### Step 1: Defining the Remote Agent
 
-In `storefront/agent.py`, we don't import the shipping class. We define a 
-remote connection.
+In `storefront/agent.py`, we define a remote connection.
 
 ```python
 shipping_agent = RemoteA2aAgent(
@@ -121,6 +155,8 @@ In `shipping/agent.json`, the Shipping Agent advertises what it can do.
 **Key points:**
 - This JSON file allows other agents to "discover" the Shipping Agent's 
   skills dynamically.
+- When we create the `shipping_agent` in the storefront, it will read the 
+  agent card.
 
 ### Step 3: Shared Database Tools
 
@@ -133,37 +169,29 @@ get_order_tool = db_client.load_tool("get-order")
 
 **Key points:**
 - The `ToolboxSyncClient` connects to the MCP Database Toolbox server.
-- Tools like `get-order` map directly to SQL queries (defined in the Toolbox 
-  configuration).
+- Tools like `get-order` map directly to SQL queries.
 
 ---
 
 ## Running the Demo
 
-This demo requires running multiple services.
+For this demo, we will run both agents within the same `adk web` process 
+for simplicity, although A2A allows them to be completely separate services.
 
-1.  **Start the Database Toolbox**:
-    (Follow instructions in `docs/` or module guides to start the MCP Toolbox 
-    pointing to your MySQL instance).
+1.  **Configure Environment**:
+    Ensure your `.env` file has the correct `TOOLBOX_URL` and `MYSQL_*` 
+    credentials.
 
-2.  **Start the Agents**:
-    You will typically run these in separate terminal windows.
-    
-    *Window 1 (Shipping Service):*
+2.  **Start ADK Web**:
+    From the `lesson-06-adk/demo` directory:
     ```bash
-    cd shipping
-    adk run --port 8000
+    adk web --a2a
     ```
-    
-    *Window 2 (Storefront Service):*
-    ```bash
-    cd storefront
-    adk web --port 8080
-    ```
+    The `--a2a` flag tells ADK to look for `agent.json` files and enable 
+    Agent-to-Agent communication features.
 
 3.  **Interact**:
-    Open your browser to the Storefront's URL (e.g., `http://localhost:8080`). 
-    Ask: "Please ship my open order."
+    Open your browser to the provided URL. Ask: "Please ship my open order."
 
 ---
 
@@ -179,7 +207,8 @@ This demo requires running multiple services.
 
 ### Common Errors
 
-**Error**: `Connection refused`
-- **Cause**: The Storefront can't reach the Shipping Agent's URL.
-- **Solution**: Ensure the Shipping Agent is running and the URL in 
-  `storefront/agent.py` matches the port where `shipping` is hosted.
+**Error**: `Connection refused` (Toolbox)
+- **Cause**: The `TOOLBOX_URL` in `.env` is incorrect or the Toolbox server 
+  isn't running.
+- **Solution**: Check the port number (default is often 5000 or 5001) and ensure 
+  the binary is active.
