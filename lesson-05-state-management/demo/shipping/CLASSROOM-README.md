@@ -21,6 +21,7 @@ Learning objectives:
 - Understanding the difference between implicit and explicit state
 - Reading and writing shared state within tools using `ToolContext`
 - Accessing session state within a `CustomAgent` via `InvocationContext`
+- Persisting state using Google Cloud Vertex AI Agent Engine
 
 ### Prerequisites
 
@@ -48,6 +49,11 @@ data is stored "out-of-band" from the conversation text.
 - **Agents** (especially Custom Agents) can retrieve that data directly, 
   ensuring 100% accuracy regardless of the conversation length.
 
+In a production environment, this state needs to live somewhere reliable. 
+This is where the **Vertex AI Agent Engine** comes in. It acts as the 
+backend for your agents, securely storing conversation history and session 
+data in the cloud.
+
 ### How It Works
 
 **Step 1: Storing State in a Tool**
@@ -60,6 +66,11 @@ A `CustomAgent` receives an `InvocationContext` when it runs. It can
 directly access `invocation_context.session.state` to retrieve the data 
 previously saved by a tool or another agent.
 
+**Step 3: Persistence with Agent Engine**
+By configuring `adk web` to point to an Agent Engine resource, all 
+`session.state` changes are automatically saved to Google Cloud. If the 
+server restarts or the user switches devices, the state is preserved.
+
 ### Key Terms
 
 **Explicit State**: Data stored in a structured way (like a dictionary) 
@@ -70,6 +81,42 @@ current session's state and other metadata.
 
 **InvocationContext**: An object passed to agents that contains information 
 about the current request, including the full session state.
+
+**Agent Engine**: A managed service on Google Cloud that includes services for 
+hosting and managing agent sessions and state.
+
+---
+
+## Setting up Agent Engine
+
+To save session state in the Agent Engine session service,, you need to 
+create an Agent Engine instance first.
+
+### Prerequisites
+
+Ensure you have your `.env` file set up with the following variables:
+
+```bash
+GOOGLE_GENAI_USE_VERTEXAI=TRUE
+GOOGLE_CLOUD_PROJECT=<your project ID>
+GOOGLE_CLOUD_LOCATION=us-central1
+```
+
+Replace `<your project ID>` with your actual Google Cloud Project ID.
+`us-central1` is recommended for the location.
+
+### Creating the Instance
+
+1.  There is a `notes` folder that contains a `create_agent_engine.py` script.
+2.  Run the `create_agent_engine.py` script:
+    ```bash
+    python create_agent_engine.py
+    ```
+3.  The script will output a **resource name**. Copy this value, since you
+    will need it when you start `adk web` later.
+
+If you lose the resource name, you can find it in the Google Cloud Console under
+the Agent Engine configuration page.
 
 ---
 
@@ -165,10 +212,32 @@ fulfillment_workflow_agent = SequentialAgent(
    state to determine if free shipping applies.
 4. The workflow continues with 100% data consistency.
 
+Note that nowhere in our code do we specify that the session state is saved 
+to Agent Engine. This is a runtime configuration and ADK handles the details 
+for us automatically. This allows us to use other session services to save 
+the information elsewhere depending on business and technical needs. If we 
+do not specify a session service, `adk web` defaults to using a memory-only 
+service that is cleared when `adk web` is restarted.
+
+**Running the agent:**
+
+To see session persistence in action, you need to use the Agent Engine.
+
+1.  **Create an Engine Instance**: Run the provided setup script.
+    ```bash
+    python ../notes/create_agent_engine.py
+    ```
+    This will print a resource name (e.g., `projects/YOUR_PROJECT/locations/us-central1/agents/YOUR_AGENT_ID`).
+
+2.  **Start the Web Server**:
+    ```bash
+    adk web --session_service_uri agentengine://projects/YOUR_PROJECT/locations/us-central1/agents/YOUR_AGENT_ID
+    ```
+
 **Expected output:**
 Regardless of how much the customer chats in between, the system always 
 knows the correct subtotal for the order because it is reading from the 
-explicit session state.
+explicit session state stored in the cloud.
 
 ---
 
@@ -196,3 +265,10 @@ coordination between agents.
   been set yet.
 - **Solution**: Always use `.get("key")` which returns `None` if the key is 
   missing, and handle the missing data case gracefully in your logic.
+
+**Error**: "Errors related to Memory Bank connection or permissions."
+- **Cause**: The service account running the agent may not have the necessary
+  IAM permissions to access Vertex AI Agent Engine Memory Bank or you gave
+  the incorrect resource name for the Memory Bank.
+- **Solution**: Grant the required IAM roles (e.g., `Agent Engine User`) to the
+  service account. Ensure the project ID and location are accurate.
