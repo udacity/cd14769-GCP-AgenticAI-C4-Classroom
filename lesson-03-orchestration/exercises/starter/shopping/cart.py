@@ -1,9 +1,11 @@
 import os
 from typing import Optional
-from google.adk.agents import Agent
+from google.adk.agents import Agent, SequentialAgent, ParallelAgent, LlmAgent
 
 from .products import products
 from .order_data import orders, OrderStatus, get_next_order_id
+# TODO: Import the inventory_data_agent from .inventory
+from .inventory import inventory_agent
 
 model = "gemini-2.5-flash"
 
@@ -51,12 +53,18 @@ def add_to_cart(order_id: str, product_id: str):
     order["cart"].append(product_id)
     return {"status": "success", "message": f"Added {products[product_id]['name']} to cart.", "cart": order["cart"]}
 
-cart_instruction = read_prompt("cart-prompt.txt")
+# --- Sub-Agents ---
 
-cart_agent = Agent(
-    name="cart_agent",
-    description="Manages user shopping carts.",
-    model=model,
-    instruction=cart_instruction,
-    tools=[get_order, add_to_cart],
-)
+# TODO: Create the get_order_agent that uses the get_order tool
+get_order_agent = None
+
+# TODO: Create the add_item_agent that uses the add_to_cart tool
+add_item_agent = None
+
+# --- Orchestration ---
+
+# TODO: Create the cart_prep_agent that runs get_order_agent and inventory_data_agent
+cart_prep_agent = None
+
+# TODO: Create the cart_agent that delegates to cart_prep_agent then add_item_agent
+cart_agent = None
