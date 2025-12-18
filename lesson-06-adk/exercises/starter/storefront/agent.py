@@ -17,6 +17,8 @@ shipping_agent = RemoteA2aAgent(
     agent_card=f"http://localhost:8000/a2a/shipping{AGENT_CARD_WELL_KNOWN_PATH}"
 )
 
+# TODO: create shopping agent
+
 storefront_instruction = read_prompt("agent-prompt.txt")
 
 root_agent = Agent(
@@ -24,5 +26,5 @@ root_agent = Agent(
     description="Main storefront orchestrator.",
     model=model,
     instruction=storefront_instruction,
-    sub_agents=[shipping_agent],
+    # TODO: Add shopping and shipping sub-agents
 )

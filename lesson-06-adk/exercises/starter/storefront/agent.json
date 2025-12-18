@@ -1,13 +1,1 @@
-{
-  "name": "storefront",
-  "url": "http://localhost:8000/a2a/storefront",
-  "description": "Main storefront agent that delegates tasks to specialized agents.",
-  "version": "1.0.0",
-  "defaultInputModes": ["text/plain"],
-  "defaultOutputModes": ["text/plain"],
-  "capabilities": {
-    "streaming": false,
-    "functions": true
-  },
-  "skills": []
-}
+TODO

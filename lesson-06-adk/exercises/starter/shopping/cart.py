@@ -1,9 +1,10 @@
 import os
 from google.adk.agents import Agent, SequentialAgent, ParallelAgent, LlmAgent
 from google.adk.tools import ToolContext
+# TODO: Import the toolbox client
+
 
 from .products import products
-from .order_data import orders, OrderStatus, get_next_order_id
 from .inventory import inventory_data_agent
 
 model = "gemini-2.5-flash"
@@ -14,48 +15,20 @@ def read_prompt(filename):
     with open(file_path, "r") as f:
         return f.read()
 
-def get_order(tool_context: ToolContext):
-    """
-    Retrieves the order for the current session
-    If no order exists, creates a new one.
-    """
-    order_id = tool_context.state.get("order_id")
+# --- Database Connection ---
+toolbox_url = os.environ.get("TOOLBOX_URL", "http://127.0.0.1:5000")
+print(f"Connecting to Toolbox at {toolbox_url}")
+db_client = ToolboxSyncClient(toolbox_url)
 
-    if order_id is None:
-      order_id = get_next_order_id()
-      tool_context.state["order_id"] = order_id
-      orders[order_id] = {
-        "cart": [],
-        "address": None,
-        "order_status": None
-      }
+# TODO: Load the tools from the toolbox
 
-    # Return the order with its ID so the caller knows it
-    return {"order_id": order_id, "order": orders[order_id]}
+# --- Tools ---
 
-def add_to_cart(product_id: str, tool_context: ToolContext):
-    """Adds a product to the specified order's cart.
-
-    Args:
-        product_id: The ID of the product to add.
-    """
-    if product_id not in products:
-        return {"error": "Product ID not found"}
-
-    # We assume get_order has run and set the state
-    order_id = tool_context.state.get("order_id")
-    if not order_id:
-        # Fallback if state is missing (shouldn't happen in proper flow)
-        return {"error": "No active order session found. Please get order first."}
-        
-    order = orders[order_id]
-
-    # Check if the order has already been placed or processed
-    if order["order_status"] is not None:
-        return {"error": f"Order {order_id} cannot be modified as its status is already set to {order['order_status'].value}"}
-
-    order["cart"].append(product_id)
-    return {"status": "success", "message": f"Added {products[product_id]['name']} to cart.", "cart": order["cart"]}
+def get_user_id(tool_context: ToolContext):
+    """Returns the user ID for the current session."""
+    return {
+        "user_id": tool_context.session.user_id
+    }
 
 # --- Sub-Agents ---
 
@@ -64,7 +37,7 @@ get_order_agent = LlmAgent(
     description="Ensures an active order session exists.",
     model=model,
     instruction=read_prompt("get-order-prompt.txt"),
-    tools=[get_order],
+    tools=[get_user_id, get_open_order_for_user_tool, create_order_tool],
 )
 
 add_item_agent = LlmAgent(
@@ -72,7 +45,7 @@ add_item_agent = LlmAgent(
     description="Adds the item to the cart.",
     model=model,
     instruction=read_prompt("add-item-prompt.txt"),
-    tools=[add_to_cart],
+    tools=[get_order_tool, add_item_to_cart_tool],
 )
 
 # Parallel Prep: Get Order + Check Inventory
