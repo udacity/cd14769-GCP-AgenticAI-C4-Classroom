@@ -89,17 +89,18 @@ You need a MySQL database to act as the shared state.
 
 ### 3. Run the MCP Server
 
-1. Navigate to the directory containing `tools.yaml`.
-2. Export your database credentials from your `.env` file so the server can read
+1. Open a **new terminal window**.
+2. Navigate to the directory above where `tools.yaml` is located.
+3. Export your database credentials from your `.env` file so the server can read
    them.
    ```bash
    export $(grep -v '^#' .env | xargs)
    ```
-3. Run the toolbox server:
+4. Run the toolbox server:
    ```bash
-   ./toolbox --tools-file tools.yaml --port 5001
+   ./toolbox --tools-file shipping/tools.yaml --port 5001
    ```
-4. Update `TOOLBOX_URL` in your `.env` file to `http://127.0.0.1:5001`.
+5. Update `TOOLBOX_URL` in your `.env` file to `http://127.0.0.1:5001`.
 
 ---
 
@@ -190,8 +191,22 @@ for simplicity, although A2A allows them to be completely separate services.
     The `--a2a` flag tells ADK to look for `agent.json` files and enable 
     Agent-to-Agent communication features.
 
-3.  **Interact**:
-    Open your browser to the provided URL. Ask: "Please ship my open order."
+3.  **Interact via Storefront**:
+    Open your browser to the provided URL (e.g., `http://localhost:8080`). 
+    Select `storefront` from the dropdown if it's not already selected.
+    Ask: "Please ship my open order."
+    You'll see that it delegates the question to the shipping agent and 
+    returns the result.
+
+4.  **Interact via Shipping Agent (Directly)**:
+    Since the Shipping Agent is also running, you can talk to it directly!
+    Select `shipping` from the agent dropdown in the web UI.
+    Ask: "What is the status of order 1001?"
+    The agent will query the database directly to answer you, demonstrating 
+    that it works as a standalone service as well.
+    Querying it directly will show you all of the sub-agents that the 
+    Shipping Agent uses which were hidden from debugging if you used the 
+    storefront.
 
 ---
 
