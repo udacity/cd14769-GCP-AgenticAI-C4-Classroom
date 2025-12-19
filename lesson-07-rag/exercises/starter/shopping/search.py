@@ -3,6 +3,7 @@ import random
 from typing import AsyncGenerator
 from google.adk.agents import Agent, LlmAgent, BaseAgent, InvocationContext
 from google.adk.events import Event
+# TODO: Import the Toolbox client
 
 model = "gemini-2.5-flash"
 
@@ -12,7 +13,14 @@ def read_prompt(filename):
     with open(file_path, "r") as f:
         return f.read()
 
-# TODO - Connect to Toolbox and load the tool
+# --- Database Connection ---
+toolbox_url = os.environ.get("TOOLBOX_URL", "http://127.0.0.1:5001")
+
+# TODO: Connect to the Toolbox
+# db_client = ToolboxSyncClient(toolbox_url)
+
+# TODO: Load the "search-products" tool from the toolbox
+# search_products_tool = ...
 
 search_instruction = read_prompt("search-prompt.txt")
 search_broad_instruction = read_prompt("search-broad-prompt.txt")
@@ -20,26 +28,24 @@ search_broad_instruction = read_prompt("search-broad-prompt.txt")
 # Original Search Agent (Exact/Phrase match)
 search_agent_exact = LlmAgent(
     name="search_agent_exact",
-    description="Searches for products using phrase matching.",
+    description="Searches for products.",
     model=model,
     instruction=search_instruction,
-    tools=[search_products],
+    tools=[], # TODO: Add the search tool
 )
 
 # New Broad Search Agent
 search_agent_broad = LlmAgent(
     name="search_agent_broad",
-    description="Searches for products matching any query word.",
+    description="Searches for products with broader queries.",
     model=model,
     instruction=search_broad_instruction,
-    tools=[search_products_broad],
+    tools=[], # TODO: Add the search tool
 )
 
 class SearchRouter(BaseAgent):
     """
     Routes to either exact or broad search based on a random threshold (A/B testing).
-    The threshold determines what percentage of requests will go to agent_b.
-    So a threshold of 0.90 means that 10% of attempts will go to agent_a on average.
     """
 
     agent_a: Agent

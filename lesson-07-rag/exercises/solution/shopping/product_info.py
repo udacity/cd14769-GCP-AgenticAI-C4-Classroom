@@ -10,11 +10,7 @@ def read_prompt(filename):
     with open(file_path, "r") as f:
         return f.read()
 
-qa_instruction = """
-You are a helpful product expert.
-Answer questions about products using the `search_product_info` tool.
-If the information is not found, politely say so.
-"""
+qa_instruction = read_prompt("product-qa-prompt.txt")
 
 product_qa_agent = LlmAgent(
     name="product_qa_agent",
