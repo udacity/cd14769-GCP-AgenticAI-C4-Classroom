@@ -32,12 +32,24 @@ Your implementation must:
 ### Repository Structure
 
 ```
-shopping/
-├── cart.py           # TODO: Update tools to use session state
+.
 ├── agent.py          # Root orchestrator
-├── inventory.py      # Inventory logic
-├── products.py       # Product catalog
-└── order_data.py     # Shared order storage
+├── agents/
+│   ├── cart.py           # TODO: Update tools to use session state
+│   ├── inventory.py      # Inventory logic
+│   ├── search.py         # SearchRouter and search logic
+│   ├── products.py       # Product catalog
+│   └── order_data.py     # Shared order storage
+├── prompts/
+│   ├── agent-prompt.txt        # Orchestrator instructions
+│   ├── search-prompt.txt       # Exact search instructions
+│   ├── search-broad-prompt.txt # Broad search instructions
+│   ├── inventory-prompt.txt    # Inventory instructions
+│   ├── cart-prompt.txt         # Main cart instructions
+│   ├── get-order-prompt.txt    # Order session instructions
+│   └── add-item-prompt.txt     # Add-to-cart instructions
+├── __init__.py
+└── requirements.txt  # Dependencies
 ```
 
 Make sure you copy ".env-sample" to ".env" and edit it to add the Google
