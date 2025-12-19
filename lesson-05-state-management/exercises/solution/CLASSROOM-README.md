@@ -53,16 +53,28 @@ The customer never needs to see or type the ID again.
 ### Repository Structure
 
 ```
-shopping/
-├── cart.py           # Implements state management using ToolContext
+.
 ├── agent.py          # Root orchestrator
-├── inventory.py      # Inventory logic
-└── order_data.py     # Shared order storage
+├── agents/
+│   ├── cart.py           # State management with ToolContext
+│   ├── inventory.py      # Inventory logic
+│   ├── search.py         # SearchRouter and search logic
+│   ├── products.py       # Product catalog
+│   └── order_data.py     # Shared order storage
+├── prompts/
+│   ├── agent-prompt.txt        # Orchestrator prompt
+│   ├── search-prompt.txt       # Exact search prompt
+│   ├── search-broad-prompt.txt # Broad search prompt
+│   ├── inventory-prompt.txt    # Inventory agent prompt
+│   ├── cart-prompt.txt         # Main cart agent prompt
+│   ├── get-order-prompt.txt    # Order session prompt
+│   └── add-item-prompt.txt     # Add-to-cart prompt
+└── __init__.py
 ```
 
 ### Step 1: Saving the Sticky ID
 
-In `cart.py`, the `get_order` tool is updated to check for existing state 
+In `agents/cart.py`, the `get_order` tool is updated to check for existing state 
 before generating a new order.
 
 ```python
@@ -81,7 +93,7 @@ def get_order(tool_context: ToolContext):
 
 ### Step 2: Retrieving State
 
-The `add_to_cart` tool signature is simplified. It no longer needs 
+In `agents/cart.py`, the `add_to_cart` tool signature is simplified. It no longer needs 
 `order_id` passed from the user.
 
 ```python
