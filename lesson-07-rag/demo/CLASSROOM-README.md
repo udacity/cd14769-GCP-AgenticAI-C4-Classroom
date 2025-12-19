@@ -30,10 +30,78 @@ Learning objectives:
 
 ### Prerequisites
 
-- A Google Cloud Project with Vertex AI Search and Cloud SQL enabled.
+- A Google Cloud Project with Vertex AI Search (Agent Builder) and Cloud SQL enabled.
+- A Google Cloud Storage (GCS) bucket for storing documents.
 - The MCP Database Toolbox (`toolbox-core`) configured to point to your MySQL
   instance.
 - Authentication configured for Google Cloud (Application Default Credentials).
+
+---
+
+## Setup
+
+### 1. Environment Variables
+
+Create or update your `.env` file in `lesson-07-rag/demo/shipping/` (and `storefront/` if needed):
+
+```env
+GOOGLE_GENAI_USE_VERTEXAI=TRUE
+GOOGLE_CLOUD_PROJECT=<your project ID>
+GOOGLE_CLOUD_LOCATION=us-central1
+
+TOOLBOX_URL=http://127.0.0.1:5001
+
+MYSQL_HOST=<your mysql server IP address>
+MYSQL_USER=<mysql user>
+MYSQL_PASSWORD=<mysql password>
+
+DATASTORE_PROJECT_ID=<your project ID>
+DATASTORE_ENGINE_ID=<your data store ID>
+DATASTORE_LOCATION=global
+```
+
+### 2. Vertex AI Search Setup
+
+To enable the agent to search through documents, we need to upload them to Cloud Storage and index them with Vertex AI Search (Agent Builder).
+
+**A. Create a GCS Bucket & Upload Documents**
+1.  Go to **Cloud Storage** in the Google Cloud Console.
+2.  Create a new bucket (standard settings, enforce public access prevention).
+3.  Upload the files from `lesson-07-rag/demo/docs/manuals/` (or your own PDF/text files) to this bucket.
+
+**B. Create the Search App & Data Store**
+1.  Go to **Agent Builder** (Vertex AI Search and Conversation).
+2.  Create a new App -> **Search** -> **Generic**.
+3.  **Create a Data Store**:
+    *   Select **Cloud Storage**.
+    *   Select the bucket you created above.
+    *   Select **Unstructured documents**.
+4.  Link the Data Store to your App and create it.
+5.  Once created, copy the **Data Store ID** (Engine ID) from the Data Stores list and update `DATASTORE_ENGINE_ID` in your `.env`.
+
+### 3. Database Setup
+
+Ensure your MySQL database has the `shipping` schema loaded.
+```bash
+mysql -h <ip_address> -u root -p < docs/shipping.sql
+```
+
+### 4. Run MCP Toolbox
+
+Navigate to the directory where `tools.yaml` is:
+```bash
+# Ensure environment variables are set
+export $(grep -v '^#' .env | xargs)
+# Run toolbox
+/path/to/toolbox --tools-file tools.yaml --port 5001
+```
+
+### 5. Run ADK Web
+
+In the directory where all the agent directories are:
+```bash
+adk web --a2a
+```
 
 ---
 
