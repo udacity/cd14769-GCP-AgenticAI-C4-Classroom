@@ -76,17 +76,29 @@ confirmation.
 ### Repository Structure
 
 ```
-shipping/
-├── shipping.py       # Defines the complex agent hierarchy (Sequential/Parallel)
-├── rates.py          # Mock data for shipping and tax rates
-├── agent.py          # Root orchestrator
-├── *-prompt.txt      # System prompts for all sub-agents
-└── ...
+.
+├── agent.py          # Root agent configuration and orchestration logic
+├── agents/
+│   ├── shipping.py   # Full fulfillment workflow (Sequential/Parallel)
+│   ├── inquiry.py    # Order inquiry handling
+│   ├── order_data.py # Mock database of orders
+│   ├── products.py   # Mock database of products
+│   └── rates.py      # Mock data for shipping and tax rates
+├── prompts/
+│   ├── agent-prompt.txt           # Orchestrator prompt
+│   ├── shipping-prompt.txt        # Main shipping agent prompt
+│   ├── shipping-cost-prompt.txt   # Shipping cost calculation prompt
+│   ├── taxes-cost-prompt.txt      # Tax calculation prompt
+│   ├── compute-order-prompt.txt   # Order total calculation prompt
+│   ├── place-order-prompt.txt     # Order placement prompt
+│   ├── order-summary-prompt.txt   # Final summary prompt
+│   └── approve-order-prompt.txt   # Final approval prompt
+└── __init__.py
 ```
 
 ### Step 1: Parallel Execution
 
-In `shipping.py`, look at how we define the `costs_agent`.
+In `agents/shipping.py`, look at how we define the `costs_agent`.
 
 ```python
 costs_agent = ParallelAgent(
@@ -103,7 +115,7 @@ costs_agent = ParallelAgent(
 
 ### Step 2: Sequential Workflow
 
-The `fulfillment_workflow_agent` chains everything together.
+The `fulfillment_workflow_agent` chains everything together in `agents/shipping.py`.
 
 ```python
 fulfillment_workflow_agent = SequentialAgent(
