@@ -73,14 +73,20 @@ Your implementation must:
 ### Repository Structure
 
 ```
-shopping/
+.
 ├── agent.py          # TODO: Define root_agent and sub-agents list
-├── search.py         # TODO: Implement search logic and agent
-├── inventory.py      # TODO: Implement inventory logic and agent
-├── cart.py           # TODO: Implement cart logic and agent
-├── products.py       # Shared product data (ReadOnly)
-├── order_data.py     # Shared order data
-├── *-prompt.txt      # TODO: Write system prompts
+├── agents/
+│   ├── search.py         # TODO: Implement search logic and agent
+│   ├── inventory.py      # TODO: Implement inventory logic and agent
+│   ├── cart.py           # TODO: Implement cart logic and agent
+│   ├── products.py       # Shared product data (ReadOnly)
+│   └── order_data.py     # Shared order data
+├── prompts/
+│   ├── agent-prompt.txt      # TODO: Write system prompt for orchestrator
+│   ├── search-prompt.txt     # TODO: Write system prompt for search agent
+│   ├── inventory-prompt.txt  # TODO: Write system prompt for inventory agent
+│   └── cart-prompt.txt       # TODO: Write system prompt for cart agent
+├── __init__.py
 └── requirements.txt  # Dependencies
 ```
 
