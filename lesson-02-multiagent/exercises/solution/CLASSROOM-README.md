@@ -73,19 +73,25 @@ found in the previous step.
 ### Repository Structure
 
 ```
-shopping/
+.
 ├── agent.py          # Root orchestrator definition
-├── search.py         # Search agent and logic
-├── inventory.py      # Inventory agent and logic
-├── cart.py           # Cart agent and logic
-├── products.py       # Mock product database
-├── order_data.py     # Mock order database
-└── *-prompt.txt      # System prompts for each agent
+├── agents/
+│   ├── search.py         # Search agent and logic
+│   ├── inventory.py      # Inventory agent and logic
+│   ├── cart.py           # Cart agent and logic
+│   ├── products.py       # Mock product database
+│   └── order_data.py     # Mock order database
+├── prompts/
+│   ├── agent-prompt.txt      # System prompt for orchestrator
+│   ├── search-prompt.txt     # System prompt for search agent
+│   ├── inventory-prompt.txt  # System prompt for inventory agent
+│   └── cart-prompt.txt       # System prompt for cart agent
+└── __init__.py
 ```
 
 ### Step 1: The Search Agent
 
-In `search.py`, we define an agent focused solely on the product catalog.
+In `agents/search.py`, we define an agent focused solely on the product catalog.
 
 ```python
 def search_products(query: str):
@@ -106,12 +112,12 @@ search_agent = Agent(
 **Key points:**
 
 - The `search_agent` only has access to the `search_products` tool.
-- Its prompt (`search-prompt.txt`) instructs it to only discuss product
+- Its prompt (`prompts/search-prompt.txt`) instructs it to only discuss product
   discovery.
 
 ### Step 2: The Inventory Agent
 
-In `inventory.py`, the agent is responsible for stock checks.
+In `agents/inventory.py`, the agent is responsible for stock checks.
 
 ```python
 def check_inventory(product_id: str):
@@ -127,7 +133,7 @@ def check_inventory(product_id: str):
 
 ### Step 3: The Cart Agent
 
-In `cart.py`, we handle the transactional state.
+In `agents/cart.py`, we handle the transactional state.
 
 ```python
 def add_to_cart(order_id: str, product_id: str):
