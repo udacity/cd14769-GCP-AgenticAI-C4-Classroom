@@ -60,17 +60,28 @@ the final step:
 ### Repository Structure
 
 ```
-shopping/
-├── cart.py           # The core logic containing the orchestration
-├── inventory.py      # Structured inventory agent
+.
 ├── agent.py          # Root orchestrator
-└── ...
+├── agents/
+│   ├── cart.py           # Core logic with Sequential/Parallel orchestration
+│   ├── inventory.py      # Structured inventory agent
+│   ├── search.py         # Search agent and logic
+│   ├── order_data.py     # Mock database of orders
+│   └── products.py       # Mock database of products
+├── prompts/
+│   ├── agent-prompt.txt      # Orchestrator prompt
+│   ├── search-prompt.txt     # Search agent prompt
+│   ├── inventory-prompt.txt  # Inventory agent prompt
+│   ├── cart-prompt.txt       # Main cart agent prompt
+│   ├── get-order-prompt.txt  # Order session management prompt
+│   └── add-item-prompt.txt   # Add-to-cart prompt
+└── __init__.py
 ```
 
 ### Step 1: Structured Inventory
 
-In `inventory.py`, we use `output_schema` to ensure the inventory check returns
-machine-readable data, not just text.
+In `agents/inventory.py`, we use `output_schema` to ensure the inventory check
+returns machine-readable data, not just text.
 
 ```python
 class InventoryData(BaseModel):
@@ -87,7 +98,7 @@ inventory_data_agent = LlmAgent(
 
 ### Step 2: Parallel Preparation
 
-In `cart.py`, we define the `cart_prep_agent`.
+In `agents/cart.py`, we define the `cart_prep_agent`.
 
 ```python
 cart_prep_agent = ParallelAgent(
@@ -107,7 +118,7 @@ cart_prep_agent = ParallelAgent(
 
 ### Step 3: Sequential Execution
 
-Finally, we chain it all together.
+Finally, we chain it all together in `agents/cart.py`.
 
 ```python
 cart_agent = SequentialAgent(
