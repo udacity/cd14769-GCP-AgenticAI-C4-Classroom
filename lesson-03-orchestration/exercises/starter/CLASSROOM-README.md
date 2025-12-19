@@ -30,14 +30,23 @@ Your implementation must:
 ### Repository Structure
 
 ```
-shopping/
+.
 ├── agent.py          # Main orchestrator
-├── cart.py           # TODO: Implement Sequential and Parallel orchestration
-├── inventory.py      # TODO: Implement inventory_data_agent
-├── products.py       # Product catalog
-├── order_data.py     # Order tracking
-├── *-prompt.txt      # TODO: Refine agent instructions
-└── .env-sample       # Environment template
+├── agents/
+│   ├── cart.py           # TODO: Implement Sequential and Parallel orchestration
+│   ├── inventory.py      # TODO: Implement inventory_data_agent
+│   ├── search.py         # Product search logic
+│   ├── products.py       # Product catalog
+│   └── order_data.py     # Order tracking
+├── prompts/
+│   ├── agent-prompt.txt      # Orchestrator instructions
+│   ├── search-prompt.txt     # Search agent instructions
+│   ├── inventory-prompt.txt  # Inventory agent instructions
+│   ├── cart-prompt.txt       # Main cart agent instructions
+│   ├── get-order-prompt.txt  # TODO: Write instructions for order session
+│   └── add-item-prompt.txt   # TODO: Write instructions for adding item
+├── __init__.py
+└── requirements.txt  # Dependencies
 ```
 
 Make sure you copy ".env-sample" to ".env" and edit it to add the Google
