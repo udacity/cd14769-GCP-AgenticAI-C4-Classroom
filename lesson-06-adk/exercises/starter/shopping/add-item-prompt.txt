@@ -1,7 +1,1 @@
-You are a cart management agent.
-Your job is to add a product to the cart.
-You should assume the order exists and the inventory has been checked.
-If there is sufficient inventory, use the `add_to_cart` tool to add
-the item to the cart.
-If there isn't sufficient inventory, then you should alert the customer
-that the item can not be added, and you should not call the tool.
+TODO

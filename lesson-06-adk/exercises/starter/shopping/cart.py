@@ -37,7 +37,8 @@ get_order_agent = LlmAgent(
     description="Ensures an active order session exists.",
     model=model,
     instruction=read_prompt("get-order-prompt.txt"),
-    tools=[get_user_id, get_open_order_for_user_tool, create_order_tool],
+    # TODO: Update tools to use the database tools and get_user_id
+    tools=[],
 )
 
 add_item_agent = LlmAgent(
@@ -45,7 +46,8 @@ add_item_agent = LlmAgent(
     description="Adds the item to the cart.",
     model=model,
     instruction=read_prompt("add-item-prompt.txt"),
-    tools=[get_order_tool, add_item_to_cart_tool],
+    # TODO: Update tools to use the database tools
+    tools=[],
 )
 
 # Parallel Prep: Get Order + Check Inventory
