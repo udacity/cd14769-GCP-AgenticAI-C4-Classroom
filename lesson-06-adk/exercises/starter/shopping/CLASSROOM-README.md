@@ -2,7 +2,7 @@
 
 In this lesson, we will learn how to coordinate state across multiple
 independent agents using a shared database and the Agent2Agent (A2A) protocol.
-Starting with a shopping assistant, we will evolve it to store order data 
+Starting with a shopping assistant, we will evolve it to store order data
 in a MySQL database, allowing a shipping agent to access the same
 order information without sharing memory.
 
@@ -23,43 +23,78 @@ Learning objectives:
 - Define an A2A Agent Card (`agent.json`) to expose agent capabilities.
 - Coordinate multiple agents (Storefront, Shopping, Shipping) where state is
   shared via the database.
+- Configure MCP Toolbox tools using a YAML configuration.
 
 ### Prerequisites
 
-- A running MySQL instance (Cloud SQL or local).
-- The MCP Database Toolbox (`toolbox-core`) running and connected to the
-  database.
+- A running MySQL instance such as in Cloud SQL.
+- The MCP Database Toolbox (`toolbox-core`) installed.
+- Basic understanding of SQL and the MCP Database Toolbox.
 - Basic understanding of ADK agents and tools.
 
 ---
 
-## Understanding the Concept
+## Setup
 
-### The Problem
+### 1. Environment Variables
 
-In previous lessons, our agents maintained state (like the shopping cart) in
-memory. This works fine for a single conversation, but it fails when:
+Make sure you have a `.env` file in the `lesson-06-adk/exercises/starter/`
+directory (or in both `shopping/` and `storefront/` if you prefer). It should
+contain:
 
-1. **Scaling**: Multiple instances of the agent can't share the cart.
-2. **Handoff**: A different agent (e.g., Shipping) needs to process the order
-   but runs in a separate process or server.
-3. **Persistence**: If the agent restarts, the cart is lost.
+```env
+GOOGLE_GENAI_USE_VERTEXAI=TRUE
+GOOGLE_CLOUD_PROJECT=<your project ID>
+GOOGLE_CLOUD_LOCATION=us-central1
+TOOLBOX_URL=http://127.0.0.1:5001
+MYSQL_HOST=<your mysql server IP address>
+MYSQL_USER=<mysql user>
+MYSQL_PASSWORD=<mysql password>
+```
 
-### The Solution
+### 2. Setup Google Cloud SQL (or Local MySQL)
 
-We move the state to a shared database. The **Shopping Agent** writes items to
-the database, and the **Shipping Agent** reads the completed order from the same
-database. The **Storefront Agent** orchestrates the interaction between the user
-and these specialized agents using A2A.
+If you do not already have an SQL instance to use:
 
-### Key Terms
+1. In the Google Cloud Console, go to **Cloud SQL**.
+2. Select **Create Instance** -> **MySQL**.
+3. Select **Enterprise** edition -> **Sandbox** preset.
+4. Choose **MySQL 8.0**.
+5. Set your Instance ID and root password.
+6. Choose the **us-central1** region (Single zone).
+7. Set Machine configuration to **1 vCPU**.
+8. Create the instance.
 
-**MCP Database Toolbox**: A set of tools that allow LLMs to interact with SQL
-databases safely.
-**A2A (Agent2Agent)**: A protocol for agents to discover and communicate with
-each other over a network.
-**Agent Card**: A JSON file that describes an agent's capabilities (skills) to
-other agents.
+Once created, get the **Public IP address** and set it as `MYSQL_HOST` in your
+`.env`.
+
+Connect to your database and create the schema:
+
+```bash
+mysql -h <ip_address> -u root -p < docs/shipping.sql
+```
+
+(You may need to grant permissions to your user as well).
+
+### 3. Setup and Run MCP Toolbox
+
+Navigate to the directory where `tools.yaml` is located, make sure your
+environment is set, and start the toolbox server:
+
+```bash
+# Ensure your environment variables are set/exported
+export $(grep -v '^#' ../.env | xargs) 
+# Run the toolbox (adjust path to your toolbox executable)
+/path/to/toolbox --tools-file tools.yaml --port 5001
+```
+
+### 4. Run ADK Web
+
+In the directory whith all the agent directories, start `adk web`:
+
+```bash
+adk web --a2a
+```
 
 ---
 
@@ -69,81 +104,70 @@ other agents.
 
 You need to update the **Shopping Agent** to use the database instead of memory
 and expose it via A2A. Then, you will update the **Storefront Agent** to
-communicate with the Shopping Agent.
+communicate with the Shopping Agent. The **Shipping Agent** is already provided
+and needs no changes.
 
 ### Requirements
 
-Your implementation must:
+1. **Configure Tools (`docs/tools.yaml`)**:
+    * Open `docs/tools.yaml`.
+    * Replace the `TODO` placeholders with the correct tool configuration.
 
-1. **Shopping Agent**:
-    * Connect to the MCP Toolbox using `ToolboxSyncClient`.
-    * Load tools (`get-order`, `create-order`, `add-item-to-cart`,
+2. **Shopping Agent (`shopping/`)**:
+    * **`cart.py`**: Connect to the MCP Toolbox using `ToolboxSyncClient`.
+    * **`cart.py`**: Load tools (`get-order`, `create-order`,`add-item-to-cart`,
       `get-open-order-for-user`) from the toolbox.
-    * Update `get_order_agent` and `add_item_agent` to use these database tools.
-    * Complete `agent.json` to define the "Shopping Manager" skill.
-2. **Storefront Agent**:
-    * Define the `shopping_agent` as a `RemoteA2aAgent`.
-    * Add the `shopping_agent` to the orchestrator's sub-agents.
+    * **`cart.py`**: Update `get_order_agent` and `add_item_agent` to use these
+      database tools.
+    * **`agent.json`**: Create this file to define the "Shopping Manager" skill
+      and agent capabilities.
 
-### Repository Structure
+3. **Storefront Agent (`storefront/`)**:
+    * **`agent.py`**: Define the `shopping_agent` as a `RemoteA2aAgent`.
+    * **`agent.py`**: Add the `shopping_agent` to the orchestrator's sub-agents.
 
+### Starter Code & Hints
+
+#### 1. Configuring Tools (`docs/tools.yaml`)
+
+You need to provide the SQL that the toolbox will execute.
+
+```yaml
+- name: get-order
+  description: Retrieve the user's active order.
+  parameters:
+    type: object
+    properties:
+      user_id:
+        type: string
+        description: The user's ID.
+  # TODO: Add the sql: field here to select * from orders where ...
 ```
-lesson-06-adk/exercises/starter/
-├── shopping/
-│   ├── cart.py       # TODO: Connect to DB and update tools
-│   ├── agent.json    # TODO: Define Agent Card
-│   ├── agent.py      # The shopping agent root
-│   └── ...
-└── storefront/
-    ├── agent.py      # TODO: Connect to Shopping Agent via A2A
-    └── ...
-```
 
-Make sure you copy `.env-sample` to `.env` in both directories (or the parent
-directory if shared) and configure your `TOOLBOX_URL` and MySQL credentials.
+#### 2. Shopping Agent (`shopping/cart.py`)
 
-**Note**: You need to have the MCP Database Toolbox running and pointing to your
-MySQL database.
-
-### Starter Code
-
-#### 1. Shopping Agent (`shopping/cart.py`)
-
-You need to establish the connection to the toolbox and load the necessary
-tools.
+Establish the connection and load tools.
 
 ```python
 # ... imports
+from toolbox_core import ToolboxSyncClient
 
-# --- Database Connection ---
-toolbox_url = os.environ.get("TOOLBOX_URL", "http://127.0.0.1:5000")
-
-# TODO: Connect to the Toolbox
-# db_client = ToolboxSyncClient(toolbox_url)
-
-# TODO: Load the tools from the toolbox
-# get_order_tool = ...
-# create_order_tool = ...
 # ...
 
-# --- Sub-Agents ---
-
-get_order_agent = LlmAgent(
-  # ...
-  # TODO: Update tools to use the database tools and get_user_id
-  tools=[],
-)
+# TODO: Load the tools from the toolbox
+# get_order_tool = db_client.load_tool("get-order")
+# ...
 ```
 
-#### 2. Shopping Agent Card (`shopping/agent.json`)
+#### 3. Shopping Agent Card (`shopping/agent.json`)
 
-Define the skill that the shopping agent provides.
+You must create this file. It defines how other agents see your shopping agent.
 
 ```json
 {
   "name": "shopping",
   "url": "http://localhost:8000/a2a/shopping",
-  ...
+  "description": "Agent that manages shopping carts...",
   "skills": [
     {
       "id": "shopping_manager",
@@ -151,51 +175,34 @@ Define the skill that the shopping agent provides.
       "description": "Manage shopping cart and find products",
       "tags": [
         "Shopping",
-        "Cart",
-        "Search"
+        "Cart"
       ],
       "examples": [
         "Find headphones",
-        "Add P001 to my cart",
-        "What is in my cart?"
+        "Add P001 to my cart"
       ]
     }
   ]
 }
 ```
 
-#### 3. Storefront Agent (`storefront/agent.py`)
+#### 4. Storefront Agent (`storefront/agent.py`)
 
 Connect the storefront to the remote shopping agent.
 
 ```python
 # ... imports
+from google.adk.agents.remote_a2a_agent import RemoteA2aAgent,
+  AGENT_CARD_WELL_KNOWN_PATH
 
 # TODO: create shopping agent
 # shopping_agent = RemoteA2aAgent(
 #    name="shopping_agent",
 #    agent_card=f"http://localhost:8000/a2a/shopping{AGENT_CARD_WELL_KNOWN_PATH}"
 # )
-
-root_agent = Agent(
-  name="storefront_agent",
-  # ...
-  # TODO: Add shopping and shipping sub-agents
-  sub_agents=[shopping_agent, shipping_agent],
-)
 ```
 
 ### Expected Behavior
-
-**Running the System:**
-
-1. Start the **Database** (MySQL).
-2. Start the **MCP Toolbox** connected to the database.
-3. Start the **ADK Web** server from the directory where all the agents are 
-   listed:
-   ```bash
-   adk web --a2a
-   ```
 
 **Example Usage:**
 
@@ -206,23 +213,15 @@ Agent: (Routes to Shopping Agent -> Search) "I found these headphones..."
 User: "Add the first one to my cart."
 Agent: (Routes to Shopping Agent -> Cart -> Add Item) "Added to cart."
 
-**Behind the Scenes:**
+**Verification:**
+After adding an item, query your MySQL database:
 
-- The Shopping Agent uses the `add-item-to-cart` tool which executes a SQL
-  `INSERT` into the `order_items` table.
-- You can verify this by querying the database directly.
+```sql
+SELECT *
+FROM order_items;
+```
 
-### Implementation Hints
-
-1. **Toolbox Connection**: The `ToolboxSyncClient` simplifies loading tools. You
-   don't need to define the tool functions manually; the toolbox provides them
-   based on the SQL configuration.
-2. **Tool Context**: The `get_user_id` tool is a helper to extract the user ID
-   from the `ToolContext`. The database tools often require `user_id` to fetch
-   the correct order.
-3. **A2A URLs**: Ensure the `url` in `agent.json` matches where the ADK Web
-   server is hosting the agent (usually
-   `http://localhost:8000/a2a/<agent-name>`).
+You should see the item added to the table.
 
 ---
 
@@ -245,10 +244,10 @@ to separate services easier.
 
 - **Cause**: The Toolbox server isn't running or the `TOOLBOX_URL` is incorrect.
 - **Solution**: Check the terminal where you started the Toolbox and verify the
-  port.
+  port matches your `.env` and code (default is often 5000 or 5001, be
+  consistent).
 
 **Error**: "Table 'orders' doesn't exist."
 
 - **Cause**: The database schema hasn't been loaded.
-- **Solution**: Run the `docs/shipping.sql` script (from the demo or solution)to
-  create the tables.
+- **Solution**: Run the `docs/shipping.sql` script into your database.
