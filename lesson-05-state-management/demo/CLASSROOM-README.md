@@ -125,17 +125,31 @@ the Agent Engine configuration page.
 ### Repository Structure
 
 ```
-shipping/
-├── shipping.py       # Updated tool and router using session state
-├── agent.py          # Root orchestrator
-├── order_data.py     # Mock database
-└── ...
+.
+├── agent.py          # Root agent configuration and orchestration logic
+├── agents/
+│   ├── shipping.py   # State management logic and tools
+│   ├── inquiry.py    # Order inquiry handling
+│   ├── order_data.py # Mock database of orders
+│   ├── products.py   # Mock database of products
+│   └── rates.py      # Mock data for shipping and tax rates
+├── prompts/
+│   ├── agent-prompt.txt           # Orchestrator prompt
+│   ├── shipping-prompt.txt        # Main shipping agent prompt
+│   ├── free-shipping-prompt.txt   # Free shipping calculation prompt
+│   ├── shipping-cost-prompt.txt   # Standard shipping cost prompt
+│   ├── taxes-cost-prompt.txt      # Tax calculation prompt
+│   ├── compute-order-prompt.txt   # Order total calculation prompt
+│   ├── place-order-prompt.txt     # Order placement prompt
+│   ├── order-summary-prompt.txt   # Final summary prompt
+│   └── approve-order-prompt.txt   # Final approval prompt
+└── __init__.py
 ```
 
 ### Step 1: Saving State in the Tool
 
-In `shipping.py`, we update the `place_order` tool to accept a `ToolContext` 
-and save the order object.
+In `agents/shipping.py`, we update the `place_order` tool to accept a
+`ToolContext` and save the order object.
 
 ```python
 def place_order(order_id: str, address: dict, tool_context: ToolContext):
@@ -160,7 +174,7 @@ def place_order(order_id: str, address: dict, tool_context: ToolContext):
 
 ### Step 2: Accessing State in the Custom Router
 
-The `ShippingRouter` now retrieves the order directly from the session state 
+The `ShippingRouter` in `agents/shipping.py` now retrieves the order directly from the session state 
 instead of searching through previous events.
 
 ```python
