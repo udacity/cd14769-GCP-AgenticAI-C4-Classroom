@@ -76,16 +76,29 @@ code rather than a system prompt and LLM instructions.
 ### Repository Structure
 
 ```
-shopping/
-├── search.py         # Contains the router and search agents
-├── search-broad-prompt.txt # Instructions for the experimental agent
-└── agent.py          # The main orchestrator
+.
+├── agent.py          # Root orchestrator
+├── agents/
+│   ├── search.py         # SearchRouter and search logic
+│   ├── cart.py           # Shopping cart orchestration
+│   ├── inventory.py      # Inventory agent logic
+│   ├── products.py       # Product catalog
+│   └── order_data.py     # Order tracking
+├── prompts/
+│   ├── agent-prompt.txt        # Orchestrator prompt
+│   ├── search-prompt.txt       # Exact search agent prompt
+│   ├── search-broad-prompt.txt # Broad search agent prompt
+│   ├── inventory-prompt.txt    # Inventory agent prompt
+│   ├── cart-prompt.txt         # Main cart agent prompt
+│   ├── get-order-prompt.txt    # Order session prompt
+│   └── add-item-prompt.txt     # Add-to-cart prompt
+└── __init__.py
 ```
 
 ### Step 1: Broad Search Tool
 
-The solution implements `search_products_broad` to improve discovery by 
-matching any word in the customer's query.
+In `agents/search.py`, we implement `search_products_broad` to improve
+discovery by matching any word in the customer's query.
 
 ```python
 def search_products_broad(query: str):
@@ -99,7 +112,7 @@ def search_products_broad(query: str):
 
 ### Step 2: Custom Router Implementation
 
-The `SearchRouter` handles the selection logic programmatically.
+The `SearchRouter` in `agents/search.py` handles the selection logic programmatically.
 
 ```python
 class SearchRouter(BaseAgent):
