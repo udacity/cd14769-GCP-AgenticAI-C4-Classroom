@@ -1,8 +1,9 @@
 # Lesson 07: Implementing Multi-Agent RAG
 
-In this lesson, we will learn how to incorporate multi-agent Retrieval Augmented
-Generation (RAG) by creating an agent that can access both unstructured policy
-documents in Vertex AI Search and structured order data in a SQL database.
+We will learn how to extend RAG capabilities to multiple cooperating agents by 
+creating a shipping inquiry agent that can retrieve information from both 
+unstructured policy documents in Vertex AI Search and structured order data 
+in a SQL database.
 
 ---
 
@@ -10,9 +11,11 @@ documents in Vertex AI Search and structured order data in a SQL database.
 
 ### What You'll Learn
 
-You will learn how to build a sophisticated inquiry system that combines the
-power of vector search for natural language documents with precise database
-lookups for transactional data.
+You will learn how to build a sophisticated inquiry system that combines the 
+power of vector search for natural language documents with precise database 
+lookups for transactional data. We will use a shipping inquiry agent to 
+demonstrate how an agent can answer policy questions from PDFs while 
+simultaneously tracking live orders from a MySQL database.
 
 Learning objectives:
 
@@ -129,6 +132,7 @@ def datastore_search_tool(search_query: str):
   return search(
     project_id=os.environ.get("DATASTORE_PROJECT_ID"),
     engine_id=os.environ.get("DATASTORE_ENGINE_ID"),
+    location=os.environ.get("DATASTORE_LOCATION", "global"),
     search_query=search_query,
   )
 ```
