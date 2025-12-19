@@ -91,10 +91,24 @@ Your implementation must:
 ### Repository Structure
 
 ```
-shopping/
-├── search.py         # You will implement the broad search and the router here
-├── search-broad-prompt.txt # Instructions for the broad search agent
-└── agent.py          # The main orchestrator that uses the search agent
+.
+├── agent.py          # Main orchestrator
+├── agents/
+│   ├── search.py         # TODO: Implement broad search and the router here
+│   ├── cart.py           # Shopping cart orchestration
+│   ├── inventory.py      # Inventory agent logic
+│   ├── products.py       # Product catalog
+│   └── order_data.py     # Order tracking
+├── prompts/
+│   ├── agent-prompt.txt        # Orchestrator instructions
+│   ├── search-prompt.txt       # Exact search instructions
+│   ├── search-broad-prompt.txt # Broad search instructions
+│   ├── inventory-prompt.txt    # Inventory instructions
+│   ├── cart-prompt.txt         # Main cart instructions
+│   ├── get-order-prompt.txt    # Order session instructions
+│   └── add-item-prompt.txt     # Add-to-cart instructions
+├── __init__.py
+└── requirements.txt  # Dependencies
 ```
 
 Make sure you copy ".env-sample" to ".env" and edit it to add the Google
