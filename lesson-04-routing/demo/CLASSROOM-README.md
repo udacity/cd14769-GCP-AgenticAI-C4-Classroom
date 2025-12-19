@@ -71,16 +71,30 @@ LLM. Instead, it:
 ### Repository Structure
 
 ```
-shipping/
-├── shipping.py       # Implementation of the ShippingRouter class
-├── agent.py          # Root orchestrator
-├── rates.py          # Shipping rates (including 'free')
-└── ...
+.
+├── agent.py          # Root agent configuration and orchestration logic
+├── agents/
+│   ├── shipping.py   # ShippingRouter class and fulfillment logic
+│   ├── inquiry.py    # Order inquiry handling
+│   ├── order_data.py # Mock database of orders
+│   ├── products.py   # Mock database of products
+│   └── rates.py      # Mock data for shipping and tax rates
+├── prompts/
+│   ├── agent-prompt.txt           # Orchestrator prompt
+│   ├── shipping-prompt.txt        # Main shipping agent prompt
+│   ├── free-shipping-prompt.txt   # Free shipping calculation prompt
+│   ├── shipping-cost-prompt.txt   # Standard shipping cost prompt
+│   ├── taxes-cost-prompt.txt      # Tax calculation prompt
+│   ├── compute-order-prompt.txt   # Order total calculation prompt
+│   ├── place-order-prompt.txt     # Order placement prompt
+│   ├── order-summary-prompt.txt   # Final summary prompt
+│   └── approve-order-prompt.txt   # Final approval prompt
+└── __init__.py
 ```
 
 ### Step 1: Defining the Custom Router
 
-In `shipping.py`, we define the `ShippingRouter` class.
+In `agents/shipping.py`, we define the `ShippingRouter` class.
 
 ```python
 class ShippingRouter(BaseAgent):
