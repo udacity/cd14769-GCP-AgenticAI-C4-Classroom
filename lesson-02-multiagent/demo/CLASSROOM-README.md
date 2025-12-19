@@ -77,14 +77,17 @@ another agent.
 ### Repository Structure
 
 ```
-shipping/
+.
 ├── agent.py          # Root agent configuration and orchestration logic
-├── shipping.py       # specialized agent for processing shipments
-├── inquiry.py        # specialized agent for handling order inquiries
-├── order_data.py     # Mock database of orders
-├── agent-prompt.txt  # System prompt for the orchestrator
-├── shipping-prompt.txt # System prompt for the shipping agent
-└── inquiry-prompt.txt  # System prompt for the inquiry agent
+├── agents/
+│   ├── shipping.py   # specialized agent for processing shipments
+│   ├── inquiry.py    # specialized agent for handling order inquiries
+│   └── order_data.py # Mock database of orders
+├── prompts/
+│   ├── agent-prompt.txt    # System prompt for the orchestrator
+│   ├── shipping-prompt.txt # System prompt for the shipping agent
+│   └── inquiry-prompt.txt  # System prompt for the inquiry agent
+└── __init__.py
 ```
 
 ### Step 1: Defining the Orchestrator
@@ -112,8 +115,8 @@ root_agent = Agent(
 
 ### Step 2: Implementing Specialized Agents
 
-The `shipping_agent` in `shipping.py` is focused on a single task: placing
-orders.
+The `shipping_agent` in `agents/shipping.py` is focused on a single task:
+placing orders.
 
 ```python
 shipping_agent = Agent(
@@ -137,8 +140,8 @@ The system is initialized by importing the sub-agents into the main `agent.py`.
 ```python
 import os
 from google.adk.agents import Agent
-from .shipping import shipping_agent
-from .inquiry import inquiry_agent
+from .agents.shipping import shipping_agent
+from .agents.inquiry import inquiry_agent
 
 model = "gemini-2.5-flash"
 
@@ -146,7 +149,7 @@ model = "gemini-2.5-flash"
 # Helper to read prompt
 def read_prompt(filename):
   script_dir = os.path.dirname(os.path.abspath(__file__))
-  file_path = os.path.join(script_dir, filename)
+  file_path = os.path.join(script_dir, "prompts", filename)
   with open(file_path, "r") as f:
     return f.read()
 
