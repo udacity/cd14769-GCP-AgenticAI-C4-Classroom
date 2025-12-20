@@ -78,15 +78,21 @@ mysql -h <ip_address> -u root -p < docs/shipping.sql
 
 ### 3. Setup and Run MCP Toolbox
 
-Navigate to the directory where `tools.yaml` is located, make sure your
-environment is set, and start the toolbox server:
-
-```bash
-# Ensure your environment variables are set/exported
-export $(grep -v '^#' ../.env | xargs) 
-# Run the toolbox (adjust path to your toolbox executable)
-/path/to/toolbox --tools-file tools.yaml --port 5001
-```
+1. Open a **new terminal window**.
+2. Navigate to the `docs` directory where `tools.yaml` is located.
+   ```bash
+   cd docs
+   ```
+3. Export your database credentials from your `.env` file (located in the parent directory) so the server can read them.
+   ```bash
+   export $(grep -v '^#' ../.env | xargs)
+   ```
+4. Run the toolbox server (assuming the `toolbox` binary is in your path or copied here):
+   ```bash
+   toolbox --tools-file tools.yaml --port 5001
+   ```
+   *Note: You may need to adjust the path to your `toolbox` binary.*
+5. Update `TOOLBOX_URL` in your `.env` file to `http://127.0.0.1:5001`.
 
 ### 4. Run ADK Web
 
@@ -114,10 +120,10 @@ and needs no changes.
     * Replace the `TODO` placeholders with the correct tool configuration.
 
 2. **Shopping Agent (`shopping/`)**:
-    * **`cart.py`**: Connect to the MCP Toolbox using `ToolboxSyncClient`.
-    * **`cart.py`**: Load tools (`get-order`, `create-order`,`add-item-to-cart`,
+    * **`agents/cart.py`**: Connect to the MCP Toolbox using `ToolboxSyncClient`.
+    * **`agents/cart.py`**: Load tools (`get-order`, `create-order`,`add-item-to-cart`,
       `get-open-order-for-user`) from the toolbox.
-    * **`cart.py`**: Update `get_order_agent` and `add_item_agent` to use these
+    * **`agents/cart.py`**: Update `get_order_agent` and `add_item_agent` to use these
       database tools.
     * **`agent.json`**: Create this file to define the "Shopping Manager" skill
       and agent capabilities.
@@ -125,6 +131,45 @@ and needs no changes.
 3. **Storefront Agent (`storefront/`)**:
     * **`agent.py`**: Define the `shopping_agent` as a `RemoteA2aAgent`.
     * **`agent.py`**: Add the `shopping_agent` to the orchestrator's sub-agents.
+
+### Repository Structure
+
+```
+lesson-06-adk/exercises/starter/
+├── docs/
+│   ├── shipping.sql  # Database schema
+│   └── tools.yaml    # TODO: Configure database tools
+├── shipping/         # Backend fulfillment service
+│   ├── agent.py      # Shipping orchestrator
+│   ├── agents/
+│   │   ├── shipping.py # Database tools and logic
+│   │   ├── inquiry.py  # Inquiry logic
+│   │   ├── products.py # Product logic
+│   │   └── rates.py    # Shipping rates logic
+│   ├── prompts/
+│   │   ├── agent-prompt.txt         # Shipping orchestrator prompt
+│   │   ├── shipping-prompt.txt      # Shipping logic prompt
+│   │   └── ... (other prompts)
+│   └── agent.json    # Agent Card defining "fulfill_order" skill
+├── shopping/         # Shopping and cart service
+│   ├── agent.py      # Shopping orchestrator
+│   ├── agents/
+│   │   ├── cart.py      # TODO: Implement database cart logic
+│   │   ├── inventory.py # Inventory check logic
+│   │   ├── search.py    # Product search logic
+│   │   ├── products.py  # Product data
+│   │   └── order_data.py # Order data logic
+│   ├── prompts/
+│   │   ├── agent-prompt.txt     # Shopping orchestrator prompt
+│   │   ├── search-prompt.txt    # Exact search prompt
+│   │   └── ... (other prompts)
+│   └── agent.json    # TODO: Create Agent Card
+└── storefront/       # Primary user-facing agent
+    ├── agent.py      # TODO: Connect to other agents via A2A
+    ├── prompts/
+    │   └── agent-prompt.txt # Storefront orchestrator prompt
+    └── agent.json    # Storefront Agent Card
+```
 
 ### Starter Code & Hints
 
