@@ -32,14 +32,38 @@ Key Concepts:
 lesson-06-adk/exercises/solution/
 ├── docs/
 │   └── tools.yaml    # Tool definitions for the toolbox
-├── shopping/
-│   ├── cart.py       # Database connection and sub-agents
-│   ├── agent.json    # A2A Agent Card definition
-│   ├── agent.py      # The shopping agent root
-│   └── ...
-└── storefront/
-    ├── agent.py      # Connects to Shopping Agent via A2A
-    └── ...
+├── shipping/         # Backend fulfillment service
+│   ├── agent.py      # Shipping orchestrator
+│   ├── agents/
+│   │   ├── shipping.py # Database tools and logic
+│   │   ├── inquiry.py  # Inquiry logic
+│   │   ├── products.py # Product logic
+│   │   └── rates.py    # Shipping rates logic
+│   ├── prompts/
+│   │   ├── agent-prompt.txt         # Shipping orchestrator prompt
+│   │   ├── shipping-prompt.txt      # Shipping logic prompt
+│   │   ├── inquiry-prompt.txt       # Inquiry logic prompt
+│   │   └── ... (other prompts)
+│   └── agent.json    # Agent Card defining "fulfill_order" skill
+├── shopping/         # Shopping and cart service
+│   ├── agent.py      # Shopping orchestrator
+│   ├── agents/
+│   │   ├── cart.py      # Database cart logic
+│   │   ├── inventory.py # Inventory check logic
+│   │   ├── search.py    # Product search logic
+│   │   ├── products.py  # Product data
+│   │   └── order_data.py # Order data logic
+│   ├── prompts/
+│   │   ├── agent-prompt.txt     # Shopping orchestrator prompt
+│   │   ├── search-prompt.txt    # Exact search prompt
+│   │   ├── cart-prompt.txt      # Cart management prompt
+│   │   └── ... (other prompts)
+│   └── agent.json    # Agent Card for shopping service
+└── storefront/       # Primary user-facing agent
+    ├── agent.py      # Connects to other agents via A2A
+    ├── prompts/
+    │   └── agent-prompt.txt # Storefront orchestrator prompt
+    └── agent.json    # Storefront Agent Card
 ```
 
 ### Step 1: Tool Configuration (`docs/tools.yaml`)
@@ -58,7 +82,7 @@ This provides a safe interface for the agents to interact with the database.
     statement: SELECT * FROM orders WHERE order_id = ?
 ```
 
-### Step 2: Shopping Agent - Database Connection (`shopping/cart.py`)
+### Step 2: Shopping Agent - Database Connection (`shopping/agents/cart.py`)
 
 The shopping agent connects to the toolbox and loads the tools. We replaced the
 in-memory `orders` dictionary with these database tools.
