@@ -440,6 +440,13 @@ of the "CLASSROOM-README.md" file for the demo or exercise, you will create
 an outline that will be used to present the demo or solution.
 
 Guidelines:
+- Before generating or updating the "module-outline.md" file, you should 
+  read through all of the code and files available for this module.
+  - Focus on the "CLASSROOM-README.md" file, since it also contains a 
+    summary of what is being taught.
+  - Make sure you focus on the changes introduced in this lesson. This may 
+    require you to look at the files from previous lessons to understand 
+    what has changed.
 - This outline will be used by the instructor to create a walk-through of 
   the code and then running and testing the code.
   - For the demo, the instructor will be introducing the concepts that this 
@@ -458,6 +465,8 @@ Guidelines:
 - Be specific - mention specific files, functions, commands, and prompts. 
   Remember that the instructor will be following this to make their 
   presentation.
+- When talking about files, reference them relative to the top level of
+  either the demo or exercise solution directory, as appropriate.
 
 Format:
 - Produce a list of bullet points of the major things to highlight
@@ -471,12 +480,25 @@ Format:
 - The title will include the name of the project directory (either "cd14768" 
   or "cd14769")
 
+Once you have completed writing the outline, wait for instructions before 
+proceeding to the next one. We often need to review and revise it. When 
+revising it, make sure you've read it to see if there are any changes since 
+you wrote it.
+
 ## Output structure
 
 # {project directory} - Lesson {module number} - {"demo" or "exercise"}
 {name of lesson}
 
-- {objective of the lesson}
+- {If this is for the Demo: One sentence describing what this lesson teaches, 
+  followed by what example we will be using to learn this lesson.  
+  (eg - something like "We will learn how to incorporate search by creating an 
+  agent that can access the PDF documents in our library.")}
+- {If this is for the Exercise Solution: One sentence describing what we 
+  hope the student has learned, followed by the example that was used to 
+  help focus on that lesson. (eg - something like "We've seen how to 
+  incorporate search through an agent that can access the PDF documents in 
+  our library.")}
 - Setup
   - {list of detailed setup instructions}
 - [{file with change}] {highlight code or prompt change}
