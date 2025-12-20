@@ -19,11 +19,15 @@ Implementing Agent Orchestration with ADK
     - **Concept**: Explain that standard `LlmAgent`s decide their own steps,
       which is great for flexibility but can be unpredictable for strict
       business processes.
+    - **No Prompt**: Note that `SequentialAgent` does not take an `instruction`
+      or prompt file. Its "logic" is purely the fixed list of `sub_agents`.
     - **Why Sequential?**: We *must* have an address before we calculate tax. We
       *must* have costs before we sum the total. `SequentialAgent` enforces this
       strict order: `place_order` -> `costs` -> `compute` -> `summary`.
 - [agents/shipping.py] Deep Dive: Parallel Execution
     - Highlight `costs_agent` defined as a `ParallelAgent`.
+    - **No Prompt**: Similar to Sequential, `ParallelAgent` has no instruction.
+      It just blindly executes all children at once.
     - **Why Parallel?**: Calculating shipping and calculating tax are
       independent tasks. Waiting for one to finish before starting the other is
       unnecessary.
@@ -34,6 +38,9 @@ Implementing Agent Orchestration with ADK
       `taxes_cost_agent`.
     - Note they are standard `LlmAgent`s focused on a single tool. This
       granularity allows them to be orchestrated by the parent agents.
+    - **Show Prompt**: Open `prompts/place-order-prompt.txt`.
+    - Explain that because these *are* LLM-driven, we still use natural language
+      to tell them how to use their specific tool and format their output.
 - running the code
 - demonstration
     - Type: "Ship order 1001 to John Doe at 123 Main St, New York, NY 10001."
