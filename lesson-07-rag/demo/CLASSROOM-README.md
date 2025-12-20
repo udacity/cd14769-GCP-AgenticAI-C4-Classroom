@@ -88,13 +88,21 @@ mysql -h <ip_address> -u root -p < docs/shipping.sql
 
 ### 4. Run MCP Toolbox
 
-Navigate to the directory where `tools.yaml` is:
-```bash
-# Ensure environment variables are set
-export $(grep -v '^#' .env | xargs)
-# Run toolbox
-/path/to/toolbox --tools-file tools.yaml --port 5001
-```
+1. Open a **new terminal window**.
+2. Navigate to the `docs` directory where `tools.yaml` is located.
+   ```bash
+   cd docs
+   ```
+3. Export your database credentials from your `.env` file (located in the parent directory) so the server can read them.
+   ```bash
+   export $(grep -v '^#' ../.env | xargs)
+   ```
+4. Run the toolbox server (assuming the `toolbox` binary is in your path or copied here):
+   ```bash
+   toolbox --tools-file tools.yaml --port 5001
+   ```
+   *Note: You may need to adjust the path to your `toolbox` binary.*
+5. Update `TOOLBOX_URL` in your `.env` file to `http://127.0.0.1:5001`.
 
 ### 5. Run ADK Web
 
@@ -157,17 +165,29 @@ while unstructured data lives in documents (PDFs, text files).
 lesson-07-rag/demo/
 ├── docs/
 │   ├── shipping.sql  # Database schema
-│   └── manuals/      # Policy documents to be indexed in Vertex AI Search
-├── shipping/
-│   ├── inquiry.py    # The RAG-enabled inquiry agent
-│   ├── datastore.py  # Helper function for Vertex AI Search
 │   ├── tools.yaml    # SQL tool definitions
-│   └── agent.py      # Shipping orchestrator
-└── storefront/
-    └── agent.py      # Main entry point (A2A Client)
+│   └── manuals/      # Policy documents to be indexed
+├── shipping/         # The backend fulfillment service
+│   ├── agent.py      # Shipping orchestrator
+│   ├── agents/
+│   │   ├── inquiry.py   # RAG-enabled inquiry agent
+│   │   ├── datastore.py # Helper for Vertex AI Search
+│   │   ├── shipping.py  # fulfillment logic
+│   │   ├── products.py  # Product data
+│   │   └── rates.py     # Shipping rates
+│   ├── prompts/
+│   │   ├── agent-prompt.txt   # Shipping orchestrator prompt
+│   │   ├── inquiry-prompt.txt # Inquiry logic prompt
+│   │   └── ... (other prompts)
+│   └── agent.json    # Agent Card
+└── storefront/       # Primary user-facing agent
+    ├── agent.py      # Connects to other agents via A2A
+    ├── prompts/
+    │   └── agent-prompt.txt # Storefront orchestrator prompt
+    └── agent.json    # Storefront Agent Card
 ```
 
-### Step 1: Configuring Database Tools (`tools.yaml`)
+### Step 1: Configuring Database Tools (`docs/tools.yaml`)
 
 We define the SQL interface in a YAML file. The MCP Toolbox uses this to
 generate tools that the agent can call.
@@ -190,7 +210,7 @@ tools:
 - The `statement` ensures the LLM doesn't have to write raw SQL, preventing
   injection attacks.
 
-### Step 2: Implementing the Search Tool (`datastore.py`)
+### Step 2: Implementing the Search Tool (`shipping/agents/datastore.py`)
 
 We use the Google Cloud Discovery Engine SDK to query our indexed documents.
 
@@ -212,7 +232,7 @@ def datastore_search_tool(search_query: str):
 - It uses environment variables to keep the code portable across different
   projects.
 
-### Step 3: The Inquiry Agent (`inquiry.py`)
+### Step 3: The Inquiry Agent (`shipping/agents/inquiry.py`)
 
 This is where the RAG logic comes together. The agent is given both the database
 tool and the search tool.
