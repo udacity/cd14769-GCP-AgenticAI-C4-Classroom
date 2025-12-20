@@ -77,15 +77,16 @@ DATASTORE_LOCATION=global
    ```bash
    mysql -h <ip> -u root -p < ../docs/inventory.sql
    ```
-2. **Run Toolbox**: Navigate to the directory with the `tools.yaml` file and 
-   start the toolbox:
+2. **Run Toolbox**: Navigate to the `docs` directory and start the toolbox:
    ```bash
-   export $(grep -v '^#' .env | xargs)
-   /path/to/toolbox --tools-file tools.yaml --port 5001
+   cd ../docs
+   export $(grep -v '^#' ../shopping/.env | xargs)
+   toolbox --tools-file tools.yaml --port 5001
    ```
 
 ### 4. Run the Agent
 
+From the directory above the `shopping` directory:
 ```bash
 adk web --a2a
 ```
@@ -101,29 +102,39 @@ inventory check to the database.
 
 ### Requirements
 
-Your implementation must:
-
-1. **Configure Tools**: Update `tools.yaml` with the configuration for
+1. **Configure Tools**: Update `docs/tools.yaml` with the configuration for
    `check-inventory` and `search-products`.
 2. **Implement Search Tool**: Complete the `datastore_search_tool` function in
-   `datastore.py` to call the Vertex AI Search API.
-3. **Inventory Migration**: Update `inventory.py` to use `ToolboxSyncClient` and
+   `agents/datastore.py` to call the Vertex AI Search API.
+3. **Inventory Migration**: Update `agents/inventory.py` to use `ToolboxSyncClient` and
    the `check-inventory` tool.
-4. **Product QA Agent**: Complete `product_info.py` to define an `LlmAgent` that
+4. **Product QA Agent**: Complete `agents/product_info.py` to define an `LlmAgent` that
    uses your `datastore_search_tool`.
-5. **Orchestrator Update**: Update `agent.py` and `agent-prompt.txt` to include
+5. **Orchestrator Update**: Update `agent.py` and `prompts/agent-prompt.txt` to include
    the new Product QA Agent.
 
 ### Repository Structure
 
 ```
-lesson-07-rag/exercises/starter/shopping/
-├── inventory.py      # TODO: Connect to DB
-├── datastore.py      # TODO: Implement search tool wrapper
-├── product_info.py   # TODO: Define RAG agent
-├── agent.py          # TODO: Add RAG agent to orchestrator
-├── tools.yaml        # TODO: Define SQL for inventory
-└── ...
+lesson-07-rag/exercises/starter/
+├── docs/
+│   ├── inventory.sql # Database schema
+│   ├── tools.yaml    # TODO: Define SQL for inventory
+│   └── P001.pdf...   # Product manuals
+├── shopping/
+│   ├── agent.py      # TODO: Add RAG agent to orchestrator
+│   ├── agents/
+│   │   ├── product_info.py # TODO: Define RAG agent
+│   │   ├── datastore.py    # TODO: Implement search tool
+│   │   ├── inventory.py    # TODO: Connect to DB
+│   │   ├── cart.py         # Cart management logic
+│   │   └── search.py       # Product search logic
+│   ├── prompts/
+│   │   ├── agent-prompt.txt      # Orchestrator instructions
+│   │   ├── product-qa-prompt.txt # TODO: RAG instructions
+│   │   └── ... (other prompts)
+│   └── __init__.py
+└── .env-sample
 ```
 
 ---
