@@ -28,24 +28,28 @@ Implementing Multi-Agent Architectures
       orchestrator refers to it in logs and reasoning.
 - [agents/shipping.py] Show the `shipping_agent` definition
     - Briefly show this is another specialized agent for a different task (
-      placeing orders).
-    - Highlighting the modularity: we can develop and test these agents
-      independently.
+      placing orders).
 - running the code
-    - Open a terminal in the `lesson-02-multiagent/demo` directory.
+    - Open a terminal above the `demo` directory.
     - Run `adk web`.
     - Open the provided local URL in a browser.
 - demonstration
-    - Type "Where is my order 1001?"
-    - Observe the thought process in the debug panel (or logs).
-    - Highlight that the orchestrator (shipping_orchestrator) receives the
-      message first.
-    - Show it deciding to call the `shipping_inquiry_agent`.
-    - Show the inquiry agent executing `get_order_info` and responding.
-    - Next, type "I want to ship order 1002 to John Doe at 123 Main St,
-      Springfield, IL 62704".
-    - Show the orchestrator routing this to the `shipping_agent`.
-    - Show the shipping agent calling `place_order`.
+    - Inquiry
+      - Type "Where is my order 1001?"
+      - Observe the thought process in the debug panel (or logs).
+      - Highlight that the orchestrator (shipping_orchestrator) receives the
+        message first.
+      - Show it deciding to call the `shipping_inquiry_agent`.
+      - Show the inquiry agent executing `get_order_info` and responding.
+    - Shipping
+      - Next, type "I want to ship order 1002 to John Doe at 123 Main St,
+        Springfield, IL 62704".
+      - Show the orchestrator routing this to the `shipping_agent`.
+      - Show the shipping agent calling `place_order`.
+    - Emphasize that these are still agents
+      - Reset the session
+      - Ask "Where is my order?"
+      - Agent will prompt you for the information
 - Conclusion
     - Summarize that we've broken a complex problem into three manageable
       pieces: an orchestrator and two specialists.
