@@ -37,6 +37,15 @@ Implementing Data Routing with Custom Agents
       time.
     - Show how we delegate to the chosen agent using
       `subagent.run_async(invocation_context)`.
+- [agents/shipping.py and prompts]
+  - shipping_cost_agent
+  - free_shipping_agent
+  - both use the same tool, but have different prompts that call it with 
+    different values
+    - `shipping-cost-prompt`
+    - `free-shipping-prompt`
+  - The result are different shipping values based on what the 
+    ShippingRouter chose
 - Running the Code
     - Run `adk web` in the terminal.
 - Demonstration
