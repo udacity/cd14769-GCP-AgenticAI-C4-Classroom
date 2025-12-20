@@ -17,6 +17,9 @@ Implementing Data Routing with Custom Agents
     - The solution is a CustomAgent which lets us write python code to 
       implement our business logic. 
     - Show the `ShippingRouter` class inheriting from `BaseAgent`.
+    - We pass there parameters to the constructor 
+      - the different agents that we want to call
+      - The cutoff point for free shipping
     - Explain `_run_async_impl`: This is where the custom python logic lives.
     - It's not prompt-based; it's code-based.
 - [agents/shipping.py] Inspecting Event History
