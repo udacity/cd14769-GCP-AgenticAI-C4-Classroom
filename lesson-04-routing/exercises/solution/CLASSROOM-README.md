@@ -1,8 +1,8 @@
 # Implementing Data Routing in ADK Systems
 
 In this lesson, we learned how to implement custom routing logic in a 
-multi-agent system by creating a search router that performs A/B testing 
-between two different search strategies.
+multi-agent system. We built a search router for A/B testing and a 
+smart inventory workflow that conditionally checks for reordering needs.
 
 ---
 
@@ -10,15 +10,18 @@ between two different search strategies.
 
 ### What You'll Learn
 
-The solution demonstrates how to extend the standard ADK routing 
-capabilities using a custom agent. It features a router that 
-programmatically chooses between two specialized search agents, 
-facilitating the evaluation of a new "broad search" implementation.
+The solution demonstrates how to extend standard ADK routing using custom 
+agents. It features:
+1. A **Search Router** that programmatically chooses between two search 
+   strategies (exact vs. broad).
+2. An **Inventory Workflow** that conditionally executes a reorder check 
+   only when stock levels are low.
 
 Learning objectives:
 - Implementing a `CustomAgent` by extending the `BaseAgent` class
 - Creating programmatic routing logic using Python
 - Utilizing A/B testing to evaluate agent performance
+- Implementing conditional logic in a sequential workflow
 - Delegating to sub-agents within a custom router
 
 ### Prerequisites
@@ -30,44 +33,27 @@ Learning objectives:
 
 ## Understanding the Concept
 
-### The Problem
+### The Problems
 
-When introducing a new version of an agent, you often want to test it 
-against the current version without fully replacing it. This is known as 
-A/B testing. Relying on an LLM to perform this selection is not ideal 
-because we want precise, controlled distribution of traffic between the 
+**A/B Testing**:
+When introducing a new version of an agent, you often want to test it
+against the current version without fully replacing it. This is known as
+A/B testing. Relying on an LLM to perform this selection is not ideal
+because we want precise, controlled distribution of traffic between the
 two versions.
+
+**Conditional Logic**: 
+We want to check reorder status *only* if an item 
+is low in stock. Running this check for every item can be inefficient.
 
 ### The Solution
 
-A `CustomAgent` allows you to write the routing logic directly in Python. 
-By creating a `SearchRouter` that inherits from `BaseAgent`, we use 
-the `random` module to decide which search agent to invoke for each 
-request, ensuring a reliable split in traffic.
+We use `CustomAgent` classes inheriting from `BaseAgent` to write this 
+logic in Python.
 
-### How It Works
-
-The implementation consists of three main parts:
-
-**Step 1: Specialized Search Agents**
-We have `search_agent_exact` (original) and `search_agent_broad` (new). 
-Each uses a different search tool and system prompt.
-
-**Step 2: The SearchRouter Class**
-This class inherits from `BaseAgent`. Its `_run_async_impl` method 
-contains the logic to select an agent based on a random number.
-
-**Step 3: Programmatic Delegation**
-Once an agent is selected, the router calls its `run_async` method and 
-yields the resulting events back to the session.
-
-### Key Terms
-
-**A/B Testing**: A method of comparing two versions of an agent to 
-determine which one performs better.
-
-**Custom Agent**: An agent whose behavior is defined by custom Python 
-code rather than a system prompt and LLM instructions.
+**SearchRouter**: Uses `random.random()` to route traffic.
+**PossiblyReorderAgent**: Inspects the event history to see the stock 
+count from the previous step and decides whether to run the reorder agent.
 
 ---
 
@@ -80,8 +66,8 @@ code rather than a system prompt and LLM instructions.
 ├── agent.py          # Root orchestrator
 ├── agents/
 │   ├── search.py         # SearchRouter and search logic
+│   ├── inventory.py      # Inventory workflow and reorder logic
 │   ├── cart.py           # Shopping cart orchestration
-│   ├── inventory.py      # Inventory agent logic
 │   ├── products.py       # Product catalog
 │   └── order_data.py     # Order tracking
 ├── prompts/
@@ -89,35 +75,19 @@ code rather than a system prompt and LLM instructions.
 │   ├── search-prompt.txt       # Exact search agent prompt
 │   ├── search-broad-prompt.txt # Broad search agent prompt
 │   ├── inventory-prompt.txt    # Inventory agent prompt
-│   ├── cart-prompt.txt         # Main cart agent prompt
-│   ├── get-order-prompt.txt    # Order session prompt
-│   └── add-item-prompt.txt     # Add-to-cart prompt
+│   ├── reorder-prompt.txt      # Reorder agent prompt
+│   └── ...
 └── __init__.py
 ```
 
-### Step 1: Broad Search Tool
+### Part 1: Search Router (A/B Testing)
 
-In `agents/search.py`, we implement `search_products_broad` to improve
-discovery by matching any word in the customer's query.
-
-```python
-def search_products_broad(query: str):
-    """Searches for products matching any word in the query."""
-    results = []
-    words = query.lower().split()
-    for pid, pdata in products.items():
-        # ... logic to match any word ...
-    return results
-```
-
-### Step 2: Custom Router Implementation
-
-The `SearchRouter` in `agents/search.py` handles the selection logic programmatically.
+In `agents/search.py`, `SearchRouter` selects an agent based on a 
+probability threshold.
 
 ```python
 class SearchRouter(BaseAgent):
     async def _run_async_impl(self, context: InvocationContext) -> AsyncGenerator[Event, None]:
-        # Simple random routing
         if random.random() < (1 - self.agent_b_rate):
             selected_agent = self.agent_a
         else:
@@ -127,36 +97,46 @@ class SearchRouter(BaseAgent):
             yield event
 ```
 
-**Key points:**
-- Inherits from `BaseAgent` for full control over execution.
-- Uses `random.random()` for deterministic traffic splitting.
-- Uses `async for` to yield events from the selected sub-agent.
+### Part 2: Inventory Workflow (Conditional Logic)
 
-### Complete Example
+In `agents/inventory.py`, we construct a sequential chain where the second 
+step may take further action.
 
-The router is instantiated and used as the primary search agent for the 
-system.
+**Step 1: The Custom Agent**
+`PossiblyReorderAgent` looks at the output of the previous agent.
 
 ```python
-# Main Search Agent (Router)
-search_agent = SearchRouter(
-    name="search_agent_router",
-    agent_a=search_agent_exact,
-    agent_b=search_agent_broad,
-    agent_b_rate=0.5
+class PossiblyReorderAgent(BaseAgent):
+    async def _run_async_impl(self, context: InvocationContext) -> AsyncGenerator[Event, None]:
+        # ... logic to find and parse InventoryData from context.session.events ...
+        
+        if inventory_data and inventory_data.count < 5:
+            # Delegate to reorder agent
+            async for event in self.reorder_agent.run_async(context):
+                yield event
+        # Else: do nothing (yield nothing)
+```
+
+If it meets the criteria, it will delegate to the reorder agent. If not, it 
+continues.
+
+**Step 2: The Sequential Chain**
+We combine the agents into a linear workflow.
+
+```python
+inventory_data_agent = SequentialAgent(
+    name="inventory_data_agent",
+    description="Checks inventory and optionally checks reorder status.",
+    sub_agents=[check_inventory_agent, possibly_reorder_agent]
 )
 ```
 
 **How it works:**
-1. The orchestrator receives a search request.
-2. It delegates to the `search_agent`, which is actually the `SearchRouter`.
-3. The router selects an agent (e.g., `search_agent_broad`).
-4. The broad search agent finds products and responds to the customer.
-
-**Expected output:**
-Over multiple searches for "blue headphones", the customer will 
-sometimes receive only exact matches and other times a broader list of 
-relevant products, depending on which path the router chose.
+1. `check_inventory_agent` runs and outputs stock data (e.g., "Count: 4").
+2. `possibly_reorder_agent` reads that event.
+3. Seeing the count is 4 (< 5), it invokes `reorder_agent`.
+4. `reorder_agent` runs and outputs the reorder status (e.g., "ORDERING").
+5. The final output to the user includes both pieces of information.
 
 ---
 
@@ -164,15 +144,16 @@ relevant products, depending on which path the router chose.
 
 ### Best Practices
 
-1. **Encapsulation**: The routing logic is isolated within `search.py`, 
-   making the system easier to maintain and the experiments easier to swap 
-   out.
-2. **Transparency**: The router's name `search_agent_router` clearly 
-   indicates its role in the architecture.
+1. **Encapsulation**: Routing logic is kept inside the custom agent, keeping 
+   the main orchestration clean.
+2. **Event Inspection**: Using `context.session.events` allows agents to 
+   react to what happened previously in the chain without needing explicit 
+   variable passing.
 
 ### Common Errors
 
-**Error**: Inconsistent state distribution
-- **Cause**: Using a non-random or biased selection method.
-- **Solution**: Use `random.random()` with a well-defined threshold for 
-  accurate A/B testing.
+**Error**: Infinite loops or re-execution.
+- **Cause**: If a custom agent blindly delegates back to the start of the 
+  chain.
+- **Solution**: Ensure your custom router always delegates forward to a 
+  specific sub-agent, not back to the parent.
