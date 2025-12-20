@@ -27,10 +27,6 @@ Implementing Agent Orchestration with ADK
     - Show `prompts/add-item-prompt.txt` to illustrate how the leaf agent is
       instructed.
 - running the code
-    - Open a terminal in the `lesson-03-orchestration/exercises/solution`
-      directory.
-    - Run `adk web`.
-    - Open the provided local URL in a browser.
 - demonstration
     - Type: "Add product P001 to my cart."
     - **Trace the flow**:
@@ -42,6 +38,7 @@ Implementing Agent Orchestration with ADK
             - It sees the order ID and the "In Stock" status from the previous
               step.
             - It successfully adds the item.
+    - Try one that is out of stock: "Add product P003 to my cart."
 - Conclusion
     - By combining Sequential and Parallel patterns, we created a "Cart
       Pipeline": Prepare -> Commit.
