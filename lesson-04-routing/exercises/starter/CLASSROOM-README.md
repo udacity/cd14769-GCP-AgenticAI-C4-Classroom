@@ -2,7 +2,8 @@
 
 In this lesson, we will learn how to implement custom routing logic in a 
 multi-agent system by creating a search router that performs A/B testing 
-between two different search strategies.
+between two different search strategies, and a sequential inventory agent 
+that conditionally checks for reordering.
 
 ---
 
@@ -11,14 +12,19 @@ between two different search strategies.
 ### What You'll Learn
 
 In this exercise, you'll learn how to extend the standard ADK routing 
-capabilities using a custom agent. You will build a router that 
-programmatically chooses between two specialized search agents, allowing 
-you to evaluate the performance of a new search implementation.
+capabilities using custom agents. You will build:
+1. A router that programmatically chooses between two specialized search 
+   agents, allowing you to evaluate the performance of a new search 
+   implementation. 
+2. A sequential workflow that conditionally triggers a reorder check based 
+   on inventory levels, which will let another back-end system reorder 
+   products before they run out.
 
 Learning objectives:
 - Create a `CustomAgent` by extending the `BaseAgent` class
 - Implement programmatic routing logic using Python
 - Understand how to use A/B testing to evaluate agent performance
+- Implement conditional logic within a sequential agent chain
 - Learn how to delegate to sub-agents within a custom router
 
 ### Prerequisites
@@ -32,32 +38,42 @@ Learning objectives:
 
 ### The Problem
 
+**Scenario 1: A/B Testing**
 When introducing a new version of an agent, you often want to test it 
 against the current version without fully replacing it. This is known as 
 A/B testing. Relying on an LLM to perform this selection is not ideal 
 because we want precise, controlled distribution of traffic between the 
 two versions.
 
+**Scenario 2: Conditional Execution**
+Sometimes, an agent should only run if a specific condition is met by the 
+previous agent's output. For example, we only want to check reorder status 
+if an item's stock is low.
+
 ### The Solution
 
 A `CustomAgent` allows you to write the routing logic directly in Python. 
-By creating a `SearchRouter` that inherits from `BaseAgent`, you can use 
-the `random` module to decide which search agent to invoke for each 
-request, ensuring a reliable and measurable split in traffic.
+By creating classes that inherit from `BaseAgent`, you can implement precise
+control flow logic.
+* We can have a `SearchRouter` that uses the `random` module to decide which 
+  search agent to invoke for each request, ensuring a reliable and 
+  measurable split in traffic.
+* We can also create a `PossiblyReorderAgent` that implements business rules 
+  to determine when we should ask another agent to confirm that 
+  an item is on order, or if we don't need to worry about it yet.
 
 ### How It Works
 
-**Step 1: Define Specialized Agents**
-You have an existing search agent and a new "broad search" agent that 
-uses a different algorithm.
+**Part 1: Search Router (A/B Testing)**
+The `SearchRouter` wrapper uses `random.random()` to choose between 
+`search_agent_exact` and `search_agent_broad` for each request.
 
-**Step 2: Implement the Router**
-The `SearchRouter` acts as a wrapper. When it is invoked, it runs a 
-simple piece of Python code to choose one of its sub-agents.
-
-**Step 3: Delegation**
-Once an agent is selected, the router delegates the `invocation_context` 
-to that agent and yields the events it produces back to the customer.
+**Part 2: Inventory Workflow (Conditional Logic)**
+The `inventory_data_agent` becomes a `SequentialAgent`.
+1. `check_inventory_agent` runs first and returns stock levels.
+2. `PossiblyReorderAgent` (a custom agent) inspects that output.
+3. If stock is low (< 5), it delegates to `reorder_agent`.
+4. If stock is sufficient, it does nothing.
 
 ### Key Terms
 
@@ -67,26 +83,40 @@ determine which one performs better.
 **Custom Agent**: An agent whose behavior is defined by custom Python 
 code rather than a system prompt and LLM instructions.
 
+**Conditional Routing**: Directing control flow based on specific data 
+criteria.
+
 ---
 
 ## Exercise Instructions
 
 ### Your Task
 
-Your task is to implement the `SearchRouter` class in `search.py` and 
-configure it to split traffic between the original `search_agent_exact` 
-and the new `search_agent_broad`.
+You have two main tasks:
+1. Implement the `SearchRouter` in `search.py` to split traffic between 
+   exact and broad search.
+2. Implement the `PossiblyReorderAgent` in `inventory.py` to handle 
+   conditional reordering.
 
 ### Requirements
 
-Your implementation must:
-1. Implement the `search_products_broad` function to match any word in the 
-   query.
-2. Create the `search_agent_broad` using the `LlmAgent` class.
-3. Implement the `SearchRouter` class by extending `BaseAgent`.
-4. The router must use a random threshold to choose between the two 
+**Search Router:**
+1. Implement `search_products_broad` to match any word in the query.
+2. Create `search_agent_broad` using the `LlmAgent` class.
+3. Implement `SearchRouter` class by extending `BaseAgent`.
+4. The router must use a random threshold to choose between the two
    agents.
-5. Update the `search_agent` to use your new `SearchRouter`.
+5. Update `search_agent` to use the router.
+
+**Inventory Workflow:**
+1. Create `reorder_agent` using `check_reorder_status` and 
+   `reorder_instruction`.
+2. Implement `PossiblyReorderAgent` to:
+   - Find the output event from `check_inventory_agent`.
+   - Parse the JSON data.
+   - Run `reorder_agent` ONLY if `count < 5`.
+3. Define `inventory_data_agent` as a `SequentialAgent` combining 
+   `check_inventory_agent` and your custom `possibly_reorder_agent`.
 
 ### Repository Structure
 
@@ -94,9 +124,9 @@ Your implementation must:
 .
 ├── agent.py          # Main orchestrator
 ├── agents/
-│   ├── search.py         # TODO: Implement broad search and the router here
+│   ├── search.py         # TODO: Implement broad search and router
+│   ├── inventory.py      # TODO: Implement conditional reorder logic
 │   ├── cart.py           # Shopping cart orchestration
-│   ├── inventory.py      # Inventory agent logic
 │   ├── products.py       # Product catalog
 │   └── order_data.py     # Order tracking
 ├── prompts/
@@ -104,6 +134,7 @@ Your implementation must:
 │   ├── search-prompt.txt       # Exact search instructions
 │   ├── search-broad-prompt.txt # Broad search instructions
 │   ├── inventory-prompt.txt    # Inventory instructions
+│   ├── reorder-prompt.txt      # Reorder instructions
 │   ├── cart-prompt.txt         # Main cart instructions
 │   ├── get-order-prompt.txt    # Order session instructions
 │   └── add-item-prompt.txt     # Add-to-cart instructions
@@ -118,9 +149,7 @@ Remember that you should **never** check-in your .env file to git.
 
 ### Starter Code
 
-You will be working primarily in `search.py`. Complete the logic where 
-marked with TODO.
-
+**search.py**
 ```python
 def search_products_broad(query: str):
     """Searches for products matching any word in the query."""
@@ -138,13 +167,34 @@ class SearchRouter(BaseAgent):
     pass
 ```
 
+**inventory.py**
+```python
+class PossiblyReorderAgent(BaseAgent):
+    async def _run_async_impl(self, context: InvocationContext) -> AsyncGenerator[Event, None]:
+       # TODO: Implement the logic to inspect the previous agent's output
+
+       # TODO: If count < 5, run the reorder_agent
+
+       # If count >= 5, do nothing (pass)
+       pass
+
+# TODO: Create the possibly_reorder_agent instance
+possibly_reorder_agent = None
+
+# TODO: Define the inventory_data_agent as a SequentialAgent
+# It should run check_inventory_agent followed by possibly_reorder_agent
+inventory_data_agent = None
+```
+
 ### Expected Behavior
 
-
-When a customer searches for products, the system should randomly select 
-either the exact match or the broad match strategy. Over many requests, 
-you should see a distribution of results based on the `agent_b_rate` you 
-define.
+1. **Search**: Searching for "blue headphones" should vary between exact 
+   matches and broad matches over time.
+2. **Inventory**: 
+   - Check a high-stock item (e.g., P001): Returns just inventory data.
+   - Check a low-stock item (e.g., P012): Returns inventory data AND 
+     triggers a "Check reorder status" action, adding `reorder_status` 
+     to the output.
 
 **Running the agent:**
 
@@ -157,17 +207,17 @@ adk web
 ```
 
 **Example usage:**
-Search for something like "blue headphones". Depending on which agent is 
-selected, you may get an exact match for a product name or a list of any 
-product that contains the word "blue" or "headphones".
+- "Do you have the webcam in stock?" (P012 is low stock -> triggers reorder check)
+- "Do you have headphones?" (P001 is high stock -> no reorder check)
 
 ### Implementation Hints
 
-1. Use `random.random()` to generate a value between 0 and 1.
-2. Remember that `_run_async_impl` is an `async` generator, so use `async for` 
-   when calling `subagent.run_async()`.
-3. The `agent_b_rate` determines the probability of selecting the second 
-   agent.
+1. **Event History**: Use `context.session.events` to look back at what 
+   happened. Iterate in reverse to find the most recent output.
+2. **JSON Parsing**: The model output is text. You need to parse it as JSON 
+   to read the `count`.
+3. **Delegation**: Remember that `_run_async_impl` is an `async` generator, 
+   so use `async for` when calling `subagent.run_async()`.
 
 ---
 
@@ -195,7 +245,7 @@ the orchestrator doesn't need to know that A/B testing is happening.
 ### Common Errors
 
 **Error**: Forgetting `yield event`
-- **Cause**: The `_run_async_impl` method must yield events from the 
-  sub-agent to the caller.
+- **Cause**: The `_run_async_impl` method must either yield events from the 
+  sub-agent to the caller or `pass` if there are no sub-agents.
 - **Solution**: Ensure you are iterating over the sub-agent's 
-  `run_async` and yielding each event.
+  `run_async` and yielding each event or `pass` if you don't have a sub-agent.

@@ -83,7 +83,7 @@ class PossiblyReorderAgent(BaseAgent):
 
         # TODO: If count < 5, run the reorder_agent
         
-        # 4. If count >= 5, do nothing (pass)
+        # If count >= 5, do nothing (pass)
         pass
 
 # TODO: Create the possibly_reorder_agent instance
