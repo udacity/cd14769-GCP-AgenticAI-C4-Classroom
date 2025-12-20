@@ -90,16 +90,19 @@ You need a MySQL database to act as the shared state.
 ### 3. Run the MCP Server
 
 1. Open a **new terminal window**.
-2. Navigate to the directory above where `tools.yaml` is located.
-3. Export your database credentials from your `.env` file so the server can read
-   them.
+2. Navigate to the `docs` directory where `tools.yaml` is located.
    ```bash
-   export $(grep -v '^#' .env | xargs)
+   cd docs
    ```
-4. Run the toolbox server:
+3. Export your database credentials from your `.env` file (located in the parent directory) so the server can read them.
    ```bash
-   ./toolbox --tools-file shipping/tools.yaml --port 5001
+   export $(grep -v '^#' ../.env | xargs)
    ```
+4. Run the toolbox server (assuming the `toolbox` binary is in your path or copied here):
+   ```bash
+   toolbox --tools-file tools.yaml --port 5001
+   ```
+   *Note: You may need to adjust the path to your `toolbox` binary.*
 5. Update `TOOLBOX_URL` in your `.env` file to `http://127.0.0.1:5001`.
 
 ---
@@ -112,12 +115,26 @@ You need a MySQL database to act as the shared state.
 lesson-06-adk/demo/
 ├── storefront/       # The primary agent facing the user
 │   ├── agent.py      # Configures RemoteA2aAgent
+│   ├── prompts/
+│   │   └── agent-prompt.txt # Storefront orchestrator prompt
 │   └── agent.json    # Agent Card
 ├── shipping/         # The backend fulfillment service
-│   ├── shipping.py   # Database tools and logic
-│   ├── agent.json    # Agent Card defining "fulfill_order" skill
-│   └── tools.yaml    # Toolbox configuration
-└── docs/shipping.sql # Schema for the shared database
+│   ├── agent.py      # Shipping orchestrator
+│   ├── agents/
+│   │   ├── shipping.py # Database tools and logic
+│   │   ├── inquiry.py  # Inquiry logic
+│   │   ├── products.py # Product logic
+│   │   └── rates.py    # Shipping rates logic
+│   ├── prompts/
+│   │   ├── agent-prompt.txt         # Shipping orchestrator prompt
+│   │   ├── shipping-prompt.txt      # Shipping logic prompt
+│   │   ├── inquiry-prompt.txt       # Inquiry logic prompt
+│   │   ├── place-order-prompt.txt   # Order placement prompt
+│   │   └── ... (other prompts)
+│   └── agent.json    # Agent Card defining "fulfill_order" skill
+└── docs/
+    ├── shipping.sql  # Schema for the shared database
+    └── tools.yaml    # Toolbox configuration
 ```
 
 ### Step 1: Defining the Remote Agent
@@ -161,7 +178,7 @@ In `shipping/agent.json`, the Shipping Agent advertises what it can do.
 
 ### Step 3: Shared Database Tools
 
-In `shipping/shipping.py`, we load tools that connect to the database.
+In `shipping/agents/shipping.py`, we load tools that connect to the database.
 
 ```python
 db_client = ToolboxSyncClient(toolbox_url)
