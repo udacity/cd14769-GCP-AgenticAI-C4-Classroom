@@ -89,7 +89,14 @@ product_counts = {
     "P009": 300,
     "P010": 60,
     "P011": 80,
-    "P012": 45,
+    "P012": 4,
     "P013": 120,
     "P014": 25
+}
+
+# Shared dictionary for reorder status
+# Key: product_id
+# Value: str ("ORDERING", "ON ORDER", "BACKORDERED")
+reorder_status = {
+    "P003": "BACKORDERED"
 }
