@@ -3,13 +3,8 @@
 Implementing Agent Orchestration with ADK
 
 - We will learn how to implement advanced orchestration patterns using ADK,
-  specifically "Sequential" (Series) and "Parallel" execution, to build a robust
-  order fulfillment system.
-- Setup
-    - Open the `lesson-03-orchestration/demo` folder in your IDE.
-    - Ensure your `.env` file is configured with your Google Cloud project
-      details.
-    - Install dependencies: `pip install -r requirements.txt`.
+  specifically "Sequential" (Series) and "Parallel" execution, as part of a 
+  robust order fulfillment system.
 - [agent.py] Top-Down: The Root Agent
     - Show `root_agent` definition.
     - Explain it acts as the main dispatcher, routing to `shipping_agent` or
@@ -31,7 +26,7 @@ Implementing Agent Orchestration with ADK
     - Highlight `costs_agent` defined as a `ParallelAgent`.
     - **Why Parallel?**: Calculating shipping and calculating tax are
       independent tasks. Waiting for one to finish before starting the other is
-      inefficient.
+      unnecessary.
     - Show how it groups `shipping_cost_agent` and `taxes_cost_agent`. ADK runs
       them simultaneously and gathers results.
 - [agents/shipping.py] The Worker Agents (LlmAgents)
@@ -40,9 +35,6 @@ Implementing Agent Orchestration with ADK
     - Note they are standard `LlmAgent`s focused on a single tool. This
       granularity allows them to be orchestrated by the parent agents.
 - running the code
-    - Open a terminal in the `lesson-03-orchestration/demo` directory.
-    - Run `adk web`.
-    - Open the provided local URL in a browser.
 - demonstration
     - Type: "Ship order 1001 to John Doe at 123 Main St, New York, NY 10001."
     - **Trace the flow**:
@@ -59,3 +51,5 @@ Implementing Agent Orchestration with ADK
     - We've moved from simple delegation to defining explicit workflows.
     - Use `SequentialAgent` when order matters.
     - Use `ParallelAgent` for efficiency when tasks are independent.
+    - Connecting agents in this way gives us control where our business logic 
+      needs it, yet letting the LLM control things where we want flexibility.
