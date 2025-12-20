@@ -17,5 +17,5 @@ root_agent = Agent(
     description="Orchestrates the shopping experience.",
     model=model,
     instruction=orchestrator_instruction,
-    sub_agents= # TODO: Specify your sub-agents
+    sub_agents=[] # TODO: Specify your sub-agents
 )
