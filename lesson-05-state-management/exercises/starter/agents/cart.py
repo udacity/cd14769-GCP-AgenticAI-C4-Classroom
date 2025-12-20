@@ -1,7 +1,6 @@
 import os
 from typing import Optional
 from google.adk.agents import Agent, SequentialAgent, ParallelAgent, LlmAgent
-# TODO: Import ToolContext from google.adk.tools
 from google.adk.tools import ToolContext
 
 from .products import products
@@ -16,7 +15,6 @@ def read_prompt(filename):
     with open(file_path, "r") as f:
         return f.read()
 
-# TODO: Update get_order to accept tool_context and use session state
 def get_order(tool_context: ToolContext):
     """
     Retrieves the order for the current session.
@@ -27,7 +25,6 @@ def get_order(tool_context: ToolContext):
     # TODO: Return the order_id and order object
     pass
 
-# TODO: Update add_to_cart to retrieve order_id from session state
 def add_to_cart(product_id: str, tool_context: ToolContext):
     """Adds a product to the specified order's cart.
 

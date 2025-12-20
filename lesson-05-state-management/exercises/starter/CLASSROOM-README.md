@@ -65,14 +65,16 @@ management logic:
 ```python
 from google.adk.tools import ToolContext
 
-# TODO: Update get_order to accept tool_context and use session state
 def get_order(tool_context: ToolContext):
     # TODO: Check if "order_id" exists in tool_context.state
+    # TODO: If not, generate a new one, save it to state, and initialize the order
+    # TODO: Return the order_id and order object
     pass
 
-# TODO: Update add_to_cart to retrieve order_id from session state
 def add_to_cart(product_id: str, tool_context: ToolContext):
     # TODO: Retrieve order_id from tool_context.state
+    # TODO: Return an error if no active session is found
+    # TODO: Implement adding to cart logic as before
     pass
 ```
 
