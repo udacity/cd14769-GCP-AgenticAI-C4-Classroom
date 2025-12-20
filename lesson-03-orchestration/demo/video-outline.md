@@ -14,6 +14,14 @@ Implementing Agent Orchestration with ADK
       heavy lifting.
     - Point out its sub-agents: `fulfillment_workflow_agent` (for doing the
       work) and `approve_order_agent` (for the final confirmation).
+- [prompts/shipping-prompt.txt] Shipping Agent's Instructions
+    - Show the prompt file.
+    - Highlight how it's instructed to delegate to the workflow for new orders 
+      and to the approval agent for confirmations.
+    - Emphasize that because `shipping_agent` is a standard `Agent`, it 
+      *requires* these instructions to know how to use its sub-agents.
+    - This also means it has standard conversational behavior with customers.
+      - "Ask for their confirmation"
 - [agents/shipping.py] Deep Dive: Sequential Orchestration
     - Highlight `fulfillment_workflow_agent` defined as a `SequentialAgent`.
     - **Concept**: Explain that standard `LlmAgent`s decide their own steps,
