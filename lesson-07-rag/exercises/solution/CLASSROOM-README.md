@@ -33,17 +33,26 @@ Key Concepts:
 ```
 lesson-07-rag/exercises/solution/
 ├── docs/
-│   └── inventory.sql   # Database schema and data
-├── shopping/
-│   ├── product_info.py # The new RAG agent
-│   ├── datastore.py    # Helper for Vertex AI Search
-│   ├── inventory.py    # Updated to use SQL tools
-│   ├── agent.py        # Updated orchestrator
+│   ├── inventory.sql   # Database schema and data
 │   ├── tools.yaml      # SQL tool definitions
-│   └── ...
+│   └── P001.pdf...     # Product manuals for RAG
+├── shopping/
+│   ├── agent.py        # Main orchestrator
+│   ├── agents/
+│   │   ├── product_info.py # RAG-enabled QA agent
+│   │   ├── datastore.py    # Vertex AI Search helper
+│   │   ├── inventory.py    # SQL-based inventory agent
+│   │   ├── cart.py         # Cart management logic
+│   │   └── search.py       # Product search logic
+│   ├── prompts/
+│   │   ├── agent-prompt.txt      # Orchestrator prompt
+│   │   ├── product-qa-prompt.txt # RAG instructions
+│   │   ├── inventory-prompt.txt  # Inventory instructions
+│   │   └── ... (other prompts)
+│   └── __init__.py
 ```
 
-### Step 1: Product QA Agent (`shopping/product_info.py`)
+### Step 1: Product QA Agent (`shopping/agents/product_info.py`)
 
 We created a specialized agent solely for answering questions based on 
 documents. This agent uses the `datastore_search_tool` to query Vertex AI 
@@ -65,7 +74,7 @@ product_qa_agent = LlmAgent(
 inventory questions don't accidentally trigger a document search, and vice 
 versa.
 
-### Step 2: Database Inventory (`shopping/inventory.py`)
+### Step 2: Database Inventory (`shopping/agents/inventory.py`)
 
 We migrated the inventory check from a hardcoded dictionary to a live database 
 query.
@@ -83,7 +92,7 @@ inventory_agent = Agent(
 
 This ensures that if the warehouse database changes, the agent immediately knows.
 
-### Step 3: Tool Definitions (`shopping/tools.yaml`)
+### Step 3: Tool Definitions (`docs/tools.yaml`)
 
 We defined the SQL interface for the inventory check.
 
