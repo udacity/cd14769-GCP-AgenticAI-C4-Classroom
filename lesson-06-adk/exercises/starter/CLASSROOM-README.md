@@ -207,6 +207,13 @@ from toolbox_core import ToolboxSyncClient
 # ...
 ```
 
+You'll also need to define the prompts.
+
+**Hint**: Not all of the database tools return values. As you're debugging, 
+you may want to check what the tool calls return through the UI. In some cases, 
+you may need to craft your prompts to encourage it to call tools that do 
+retrieve values after those that don't so you know what values have been set. 
+
 #### 3. Shopping Agent Card (`shopping/agent.json`)
 
 You must create this file. It defines how other agents see your shopping agent.

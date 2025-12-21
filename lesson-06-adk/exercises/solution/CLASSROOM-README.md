@@ -108,6 +108,26 @@ get_order_agent = LlmAgent(
 )
 ```
 
+You needed to update the prompts as well. In some cases, the prompt needs to 
+emphasize particular steps to take to handle tool behavior. For example, the 
+`create-order` tool does an SQL insert, but never returns the ID of the new 
+row created. So we need to have the LLM re-call the 
+`get-open-order-for-user` tool to get the current order. So, for example, 
+our `get-order-prompt.txt` has this:
+
+```text
+You are the Order Session Agent.
+Your goal is to ensure the user has an active order session ID.
+
+Process:
+1.  **Identify User**: Retrieve the current `user_id` using the `get_user_id` tool.
+2.  **Check Existing**: Check if an open order already exists for this user using `get-open-order-for-user`.
+3.  **Create if Missing**: If no open order exists, you must do *both* of the following steps:
+    3a. Create a new order using the `create-order` tool
+    3b. Get the now-open order by calling the `get-open-order-for-user` tool again
+4.  **Output**: Always return the valid `order_id` to be used by subsequent agents.
+```
+
 ### Step 3: Shopping Agent Card (`shopping/agent.json`)
 
 We defined the `agent.json` file to describe the shopping agent's capabilities to
