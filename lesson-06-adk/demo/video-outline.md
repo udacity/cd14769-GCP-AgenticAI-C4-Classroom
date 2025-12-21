@@ -79,4 +79,5 @@ Implementing Multi-Agent State Coordination with ADK & A2A
       sync.
     - This pattern allows us to build much more complicated and richer 
       agents that can run on separate servers, yet still delegate to each 
-      other where it makes the most sense.
+      other where it makes the most sense. We explore this even more in the 
+      exercise.
