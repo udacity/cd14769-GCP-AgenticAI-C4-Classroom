@@ -47,16 +47,23 @@ Implementing Advanced State Management
       that wipes clean if the server restarts. Using the URI saves data to the
       cloud.
     - **Scenario**: Shipping an order to an address.
-        - "I want to buy the Wireless Headphones."
-        - "Place order for Jane Doe, 456 Elm St..."
+      - Ship order 1002 to Jane Doe, 12 Third St, Forth, NY, 56789
+      - What was my order again?
     - **Inspect**:
-        - Observe the logs or output. The `place_order` tool runs.
-        - Internally, it writes to `tool_context.state`.
-        - The `ShippingRouter` then immediately reads that state to decide on
-          free shipping (since headphones > $100).
+        - If we look at the system state before it runs, we see it is empty 
+        - The `place_order` tool runs.
+        - The "stateDelta" shows that it is setting the order state
+        - If we look at the state of the system, we see it has also changed.
+        - Once it stops, we can stop `adk web` and restart it.
+        - Then ask about our order.
+    - Stop `adk web` and restart it without the session service. Repeat the 
+      scenario.
+        - This time, asking about our order seems to hang.
+        - If we look at `adk web`, we see it can't load our existing session.
 - Conclusion
     - Explicit state management allows for robust data sharing between agents.
-    - We use `ToolContext` to write data (like our order) into the state.
-    - We use `InvocationContext` to read that data back out in our agents.
-    - Combined with the Agent Engine, this gives us persistent memory that
-      survives across the session.
+    - Contexts, either in the `ToolContext` or the `InvocationContext` let 
+      us write to and read from sessions tate.
+    - Combined with the Agent Engine, this gives us persistent memory for a 
+      session that survives server restarts with no additional coding on our 
+      part.
