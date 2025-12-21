@@ -5,9 +5,6 @@ Explicit State in Shopping Cart
 - We have updated the shopping agent to use advanced state management,
   specifically using `ToolContext` to maintain a sticky `order_id`.
 - Setup
-    - Open the `lesson-05-state-management/exercises/solution` directory.
-    - Ensure `.env` is configured.
-    - Install dependencies: `pip install -r requirements.txt`.
     - Ensure the Agent Engine is ready (resource URI).
 - [agents/cart.py] Sticky Order ID with `ToolContext`
     - Focus on `get_order` tool.
@@ -31,17 +28,8 @@ Explicit State in Shopping Cart
         - "Add the USB Hub to my cart." (Triggers `add_to_cart`, reads ID from
           state).
         - "Add the HDMI Cable." (Again, reads ID from state).
-    - **Persistence Check**:
-        - Stop the `adk web` server.
-        - Restart it with the same URI.
-        - Ask "What is in my cart?".
-        - The agent should successfully retrieve the cart because the `order_id`
-          was persisted in the Agent Engine session state, allowing it to look
-          up the correct order data.
 - Conclusion
     - By using `ToolContext` for explicit state, we decoupled the tool's
       dependencies from the conversation text.
-    - The agent is now more robust and user-friendly, as the user doesn't need
-      to track their order number.
-    - Backed by Agent Engine, this state survives interruptions, mimicking a
-      real-world logged-in experience.
+    - The agent is now more robust since the order id and our conversation 
+      state are now saved in Agent Engine.
