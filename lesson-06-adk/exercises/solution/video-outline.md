@@ -2,8 +2,9 @@
 
 Implementing Multi-Agent State Coordination & Orchestration
 
-- We've seen how to incorporate search through an agent that can access the PDF
-  documents in our library.
+- We've seen how to incorporate persistent state and A2A coordination into our
+  shopping agent, allowing it to share order data with the shipping agent through
+  a database.
 - Setup
     - Ensure the MySQL database is running and populated with
       `docs/shipping.sql`.
@@ -19,18 +20,19 @@ Implementing Multi-Agent State Coordination & Orchestration
       `db_client = ToolboxSyncClient(toolbox_url)`.
     - Highlighting the loading of tools: `get_order_tool`,
       `add_item_to_cart_tool`.
-    - Show how these tools are passed to `get_order_agent` and `add_item_agent`.
+    - Show how these tools are passed to `get_order_agent` and `add_item_agent`
+      replacing the previous in-memory dictionary.
     - Mention that `get_order_agent` is responsible for ensuring an active order
       session exists (checking for open orders first, then creating if needed).
 - [shopping/agent.json] Shopping Agent Card
     - Show the `skills` definition: `shopping_manager`.
     - Explain that this exposes the Shopping Agent's capabilities (Cart
-      management, Product search) via A2A.
+      management, Product search) via A2A so the Storefront can discover them.
 - [storefront/agent.py] Storefront Orchestration
     - Show the configuration of `shopping_agent` as a `RemoteA2aAgent`, pointing
       to its Agent Card URL.
     - Explain how `root_agent` now orchestrates both `shipping_agent` and
-      `shopping_agent` remotely.
+      `shopping_agent` remotely, without importing their code directly.
 - running the code
     - Ensure all services (Database, Toolbox, ADK Web) are running.
 - demonstration
