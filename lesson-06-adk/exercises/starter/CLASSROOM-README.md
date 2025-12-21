@@ -175,18 +175,21 @@ lesson-06-adk/exercises/starter/
 
 #### 1. Configuring Tools (`docs/tools.yaml`)
 
-You need to provide the SQL that the toolbox will execute.
+You need to configure the tools, particularly with the SQL that the 
+toolbox will execute and a definition of the parameters (in order) that will 
+be given to the SQL.
 
 ```yaml
-- name: get-order
-  description: Retrieve the user's active order.
-  parameters:
-    type: object
-    properties:
-      user_id:
-        type: string
-        description: The user's ID.
-  # TODO: Add the sql: field here to select * from orders where ...
+tools:
+  get-order:
+    kind: mysql-sql
+    source: storefront
+    description: Retrieve an order by its ID.
+    parameters:
+      - name: order_id
+        type: integer
+        description: The ID of the order to retrieve.
+    statement: # TODO: Add the SQL here to execute this
 ```
 
 #### 2. Shopping Agent (`shopping/cart.py`)
@@ -263,7 +266,7 @@ After adding an item, query your MySQL database:
 
 ```sql
 SELECT *
-FROM order_items;
+FROM orders;
 ```
 
 You should see the item added to the table.
