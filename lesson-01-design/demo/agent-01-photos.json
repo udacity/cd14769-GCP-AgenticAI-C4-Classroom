@@ -17,8 +17,39 @@
       "tags": ["Photos", "Orchestrator"],
       "examples": [
         "Find all my photos of cats",
-        "Edit the last photo to be black and white",
-        "How much storage do I have left?"
+        "Edit the last photo to be black and white"
+      ]
+    },
+    {
+      "id": "storage_request",
+      "name": "Storage Request",
+      "description": "Store or update photos",
+      "tags": ["Photos", "Save", "Index"],
+      "examples": [
+        "Add photo id cd48cf19-d3f0-4033-9fee-0c2eb3adab85",
+        "Index photo 9066c01e-f097-4b1b-ac36-4af383122a80"
+      ]
+    },
+    {
+      "id": "search_request",
+      "name": "Search Request",
+      "description": "Search or browse photos",
+      "tags": ["Photos", "Search", "Browse"],
+      "examples": [
+        "Search for photos of my cats",
+        "Show me the shared album from Albuquerque",
+        "Show me pictures from last week"
+      ]
+    },
+    {
+      "id": "edit_request",
+      "name": "Edit Request",
+      "description": "Edit photos using a variety of techniques",
+      "tags": ["Photos", "Edit", "Crop", "Resize","Magic Eraser"],
+      "examples": [
+        "Crop the last photo into 16x9",
+        "Remove people from the background",
+        "Make it more colorful"
       ]
     }
   ]
