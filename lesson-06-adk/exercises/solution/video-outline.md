@@ -11,6 +11,13 @@ Implementing Multi-Agent State Coordination & Orchestration
     - Verify `.env` file has correct database credentials and `TOOLBOX_URL`.
     - Start the MCP Toolbox: `toolbox --tools-file tools.yaml --port 5001`.
     - Start the ADK web interface with A2A enabled: `adk web --a2a`.
+    - Although this will be running all the agents in a single `adk web` 
+      instance, these agents could all be running separately.
+- [storefront/agent.py] Storefront Orchestration
+    - Show the configuration of `shopping_agent` as a `RemoteA2aAgent`, pointing
+      to its Agent Card URL.
+    - Explain how `root_agent` now orchestrates both `shipping_agent` and
+      `shopping_agent` remotely, without importing their code directly.
 - [docs/tools.yaml] Tool Configuration
     - Walk through the defined SQL tools: `get-order`,
       `get-open-order-for-user`, `add-item-to-cart`, etc.
@@ -23,23 +30,28 @@ Implementing Multi-Agent State Coordination & Orchestration
     - Show how these tools are passed to `get_order_agent` and `add_item_agent`
       replacing the previous in-memory dictionary.
     - Mention that `get_order_agent` is responsible for ensuring an active order
-      session exists (checking for open orders first, then creating if needed).
+      session exists
+      - It checks for open orders first, then creating if needed.
+      - But the creation tool doesn't return any values.
+      - We take care of this in the prompt.
+- [shopping/prompts/get-order-prompt.txt]
+    - The steps here seek to get the user id and locate the currently open 
+      order for this user.
+    - If there is no order id associated with this user, it needs to create 
+      an order.
+    - Since that tool doesn't return any values, if it does create an order, 
+      it then needs to go look for an open order again.
 - [shopping/agent.json] Shopping Agent Card
     - Show the `skills` definition: `shopping_manager`.
     - Explain that this exposes the Shopping Agent's capabilities (Cart
       management, Product search) via A2A so the Storefront can discover them.
-- [storefront/agent.py] Storefront Orchestration
-    - Show the configuration of `shopping_agent` as a `RemoteA2aAgent`, pointing
-      to its Agent Card URL.
-    - Explain how `root_agent` now orchestrates both `shipping_agent` and
-      `shopping_agent` remotely, without importing their code directly.
 - running the code
     - Ensure all services (Database, Toolbox, ADK Web) are running.
 - demonstration
     - Open the ADK Web UI and select `storefront`.
     - Ask: "I want to buy some headphones."
-        - Observe the Storefront routing the request to the `shopping_agent` (
-          via A2A).
+        - Observe the Storefront routing the request to the `shopping_agent`
+          (via A2A).
         - The Shopping Agent then routes to its internal `search_agent` to find
           products.
     - Ask: "Add the first one to my cart."
