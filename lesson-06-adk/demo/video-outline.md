@@ -57,16 +57,20 @@ Implementing Multi-Agent State Coordination with ADK & A2A
 - demonstration
     - Open the web UI (e.g., `http://localhost:8080`).
     - Select the `storefront` agent.
-    - Ask: "Please ship my open order."
+    - Ask: "Ship order 1002 to Jane Doe, 12 Third St, Forth, tx, 56789."
     - Observe: The Storefront agent receives the request, recognizes it can't
       handle it, and delegates to the `shipping_agent` via A2A.
     - *Behind the Scenes:* Note that the Storefront didn't send the *order
       object*. It sent the *intent*. The Shipping agent looked up the order in
       the DB.
+    - But we don't see any of that. We just see the reply.
+    - If we want to see it, we can access the agent directly, or we can use 
+      something like Cloud Trace to view it.
     - Switch to the `shipping` agent in the dropdown.
     - Ask: "What is the status of order 1001?"
-    - Observe: The Shipping agent queries the database directly to answer,
-      proving it works as a standalone service.
+    - Observe: The Shipping agent queries the database directly to answer
+    - We see the activity in the debugger, proving it works as a standalone 
+      service. 
 - conclusion and summary
     - We've moved from monolithic agents that may contain sub-agents to 
       distributed systems, where a sub-agent may run remotely.
