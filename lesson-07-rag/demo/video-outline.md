@@ -26,15 +26,6 @@ Multi-Agent RAG with Vertex AI Search and SQL
         - Export environment variables:
           `export $(grep -v '^#' ../shipping/.env | xargs)`.
         - Start the toolbox: `toolbox --tools-file tools.yaml --port 5001`.
-- [shipping/agents/datastore.py] The Vertex AI Search Tool
-    - Show `datastore_search_tool` and the `search` function.
-    - Explain how it uses `discoveryengine` client to retrieve chunks from PDF
-      documents.
-    - This connects our agent to the "knowledge base".
-- [docs/tools.yaml] The SQL Tool Definition
-    - Show the `get-order` tool.
-    - Explain the SQL statement: `SELECT * FROM orders WHERE order_id = ?`.
-    - This gives our agent access to "live business data".
 - [shipping/agents/inquiry.py] The Inquiry Agent Structure
     - Show `get_order_agent`: dedicated to using `get_order_tool`.
     - Show `policy_search_agent`: dedicated to using `datastore_search_tool`.
@@ -46,6 +37,15 @@ Multi-Agent RAG with Vertex AI Search and SQL
     - "If a customer references their order... you must call the
       `get_order_agent`".
     - "Use `policy_search_agent` to search the knowledge base".
+- [shipping/agents/datastore.py] The Vertex AI Search Tool
+    - Show `datastore_search_tool` and the `search` function.
+    - Explain how it uses `discoveryengine` client to retrieve chunks from PDF
+      documents.
+    - This connects our agent to the "knowledge base".
+- [docs/tools.yaml] The SQL Tool Definition
+    - Show the `get-order` tool.
+    - Explain the SQL statement: `SELECT * FROM orders WHERE order_id = ?`.
+    - This gives our agent access to "live business data".
 - Running the code
     - Start the agent: `adk web --a2a` in the `lesson-07-rag/demo` directory.
     - Open the web interface.
