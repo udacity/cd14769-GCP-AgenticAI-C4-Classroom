@@ -69,5 +69,13 @@ def datastore_search_tool( search_query: str ):
     Args:
         search_query (str): What information about the store the customer is looking for
     """
-    # TODO
-
+    try:
+        results = search(
+            # TODO: get the project_id, engine_id, and location from environment
+            # TODO: you also need the search_query
+        )
+        if not results:
+            return "No results found."
+        return results
+    except Exception as e:
+        return f"A problem occurred: {e}"
