@@ -1,8 +1,8 @@
 # Lesson 07: Implementing Multi-Agent RAG
 
-We will learn how to extend RAG capabilities to multiple cooperating agents by 
-creating a shipping inquiry agent that can retrieve information from both 
-unstructured policy documents in Vertex AI Search and structured order data 
+We will learn how to extend RAG capabilities to multiple cooperating agents by
+creating a shipping inquiry agent that can retrieve information from both
+unstructured policy documents in Vertex AI Search and structured order data
 in a SQL database.
 
 ---
@@ -11,10 +11,10 @@ in a SQL database.
 
 ### What You'll Learn
 
-You will learn how to build a sophisticated inquiry system that combines the 
-power of vector search for natural language documents with precise database 
-lookups for transactional data. We will use a shipping inquiry agent to 
-demonstrate how an agent can answer policy questions from PDFs while 
+You will learn how to build a sophisticated inquiry system that combines the
+power of vector search for natural language documents with precise database
+lookups for transactional data. We will use a shipping inquiry agent to
+demonstrate how an agent can answer policy questions from PDFs while
 simultaneously tracking live orders from a MySQL database.
 
 Learning objectives:
@@ -30,7 +30,8 @@ Learning objectives:
 
 ### Prerequisites
 
-- A Google Cloud Project with Vertex AI Search (Agent Builder) and Cloud SQL enabled.
+- A Google Cloud Project with Vertex AI Search (Agent Builder) and Cloud SQL
+  enabled.
 - A Google Cloud Storage (GCS) bucket for storing documents.
 - The MCP Database Toolbox (`toolbox-core`) configured to point to your MySQL
   instance.
@@ -42,7 +43,8 @@ Learning objectives:
 
 ### 1. Environment Variables
 
-Create or update your `.env` file in `lesson-07-rag/demo/shipping/` (and `storefront/` if needed):
+Create or update your `.env` file in `lesson-07-rag/demo/shipping/` (and
+`storefront/` if needed):
 
 ```env
 GOOGLE_GENAI_USE_VERTEXAI=TRUE
@@ -62,26 +64,31 @@ DATASTORE_LOCATION=global
 
 ### 2. Vertex AI Search Setup
 
-To enable the agent to search through documents, we need to upload them to Cloud Storage and index them with Vertex AI Search (Agent Builder).
+To enable the agent to search through documents, we need to upload them to Cloud
+Storage and index them with Vertex AI Search (Agent Builder).
 
 **A. Create a GCS Bucket & Upload Documents**
-1.  Go to **Cloud Storage** in the Google Cloud Console.
-2.  Create a new bucket (standard settings, enforce public access prevention).
-3.  Upload the files from `lesson-07-rag/demo/docs/manuals/` (or your own PDF/text files) to this bucket.
+
+1. Go to **Cloud Storage** in the Google Cloud Console.
+2. Create a new bucket (standard settings, enforce public access prevention).
+3. Upload the files from `docs/policies` to this bucket.
 
 **B. Create the Search App & Data Store**
-1.  Go to **Agent Builder** (Vertex AI Search and Conversation).
-2.  Create a new App -> **Search** -> **Generic**.
-3.  **Create a Data Store**:
-    *   Select **Cloud Storage**.
-    *   Select the bucket you created above.
-    *   Select **Unstructured documents**.
-4.  Link the Data Store to your App and create it.
-5.  Once created, copy the **Data Store ID** (Engine ID) from the Data Stores list and update `DATASTORE_ENGINE_ID` in your `.env`.
+
+1. Go to **Agent Builder** (Vertex AI Search and Conversation).
+2. Create a new App -> **Search** -> **Generic**.
+3. **Create a Data Store**:
+    * Select **Cloud Storage**.
+    * Select the bucket you created above.
+    * Select **Unstructured documents**.
+4. Link the Data Store to your App and create it.
+5. Once created, copy the **Data Store ID** (Engine ID) from the Data Stores
+   list and update `DATASTORE_ENGINE_ID` in your `.env`.
 
 ### 3. Database Setup
 
 Ensure your MySQL database has the `shipping` schema loaded.
+
 ```bash
 mysql -h <ip_address> -u root -p < docs/shipping.sql
 ```
@@ -93,11 +100,13 @@ mysql -h <ip_address> -u root -p < docs/shipping.sql
    ```bash
    cd docs
    ```
-3. Export your database credentials from your `.env` file (located in the parent directory) so the server can read them.
+3. Export your database credentials from your `.env` file (located in the parent
+   directory) so the server can read them.
    ```bash
    export $(grep -v '^#' ../.env | xargs)
    ```
-4. Run the toolbox server (assuming the `toolbox` binary is in your path or copied here):
+4. Run the toolbox server (assuming the `toolbox` binary is in your path or
+   copied here):
    ```bash
    toolbox --tools-file tools.yaml --port 5001
    ```
@@ -107,6 +116,7 @@ mysql -h <ip_address> -u root -p < docs/shipping.sql
 ### 5. Run ADK Web
 
 In the directory where all the agent directories are:
+
 ```bash
 adk web --a2a
 ```
@@ -166,7 +176,7 @@ lesson-07-rag/demo/
 ├── docs/
 │   ├── shipping.sql  # Database schema
 │   ├── tools.yaml    # SQL tool definitions
-│   └── manuals/      # Policy documents to be indexed
+│   └── policies/     # Policy documents to be indexed
 ├── shipping/         # The backend fulfillment service
 │   ├── agent.py      # Shipping orchestrator
 │   ├── agents/
@@ -234,41 +244,45 @@ def datastore_search_tool(search_query: str):
 
 ### Step 3: The Inquiry Agent (`shipping/agents/inquiry.py`)
 
-This is where the RAG logic comes together. The agent delegates specific questions to specialized sub-agents.
+This is where the RAG logic comes together. The agent delegates specific
+questions to specialized sub-agents.
 
 ```python
 # inquiry.py
 get_order_agent = Agent(
-    name="get_order_agent",
-    description="Handles questions about the status of orders",
-    model=model,
-    instruction=read_prompt("inquiry-order-prompt.txt"),
-    tools=[get_order_tool],
+  name="get_order_agent",
+  description="Handles questions about the status of orders",
+  model=model,
+  instruction=read_prompt("inquiry-order-prompt.txt"),
+  tools=[get_order_tool],
 )
 
 policy_search_agent = Agent(
-    name="datastore_search_agent",
-    description="Handles questions about corporate store policies, including shipping policies",
-    model=model,
-    instruction=read_prompt("inquiry-policy-prompt.txt"),
-    tools=[datastore_search_tool],
+  name="datastore_search_agent",
+  description="Handles questions about corporate store policies, including shipping policies",
+  model=model,
+  instruction=read_prompt("inquiry-policy-prompt.txt"),
+  tools=[datastore_search_tool],
 )
 
 inquiry_agent = Agent(
-    name="shipping_inquiry_agent",
-    description="Handles questions about shipping policies and tracking.",
-    model=model,
-    instruction=read_prompt("inquiry-prompt.txt"),
-    sub_agents=[get_order_agent, policy_search_agent],
+  name="shipping_inquiry_agent",
+  description="Handles questions about shipping policies and tracking.",
+  model=model,
+  instruction=read_prompt("inquiry-prompt.txt"),
+  sub_agents=[get_order_agent, policy_search_agent],
 )
 ```
 
 **How it works:**
 
 1. When a customer asks a question, the agent reviews the available sub-agents.
-2. If the question is about a policy, it delegates to `policy_search_agent`, which uses `datastore_search_tool`.
-3. If the question is about an order, it delegates to `get_order_agent`, which uses `get_order_tool`.
-4. The sub-agents return their findings, and the inquiry agent synthesizes the answer.
+2. If the question is about a policy, it delegates to `policy_search_agent`,
+   which uses `datastore_search_tool`.
+3. If the question is about an order, it delegates to `get_order_agent`, which
+   uses `get_order_tool`.
+4. The sub-agents return their findings, and the inquiry agent synthesizes the
+   answer.
 
 ### Complete Example
 
@@ -280,11 +294,11 @@ from .agents.shipping import shipping_agent
 from .agents.inquiry import inquiry_agent
 
 root_agent = Agent(
-    name="shipping_orchestrator",
-    description="Main orchestrator for shipping tasks.",
-    model=model,
-    instruction=orchestrator_instruction,
-    sub_agents=[shipping_agent, inquiry_agent],
+  name="shipping_orchestrator",
+  description="Main orchestrator for shipping tasks.",
+  model=model,
+  instruction=orchestrator_instruction,
+  sub_agents=[shipping_agent, inquiry_agent],
 )
 ```
 
