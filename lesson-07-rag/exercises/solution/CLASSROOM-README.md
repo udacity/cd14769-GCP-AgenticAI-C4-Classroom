@@ -94,7 +94,7 @@ This ensures that if the warehouse database changes, the agent immediately knows
 
 ### Step 3: Tool Definitions (`docs/tools.yaml`)
 
-We defined the SQL interface for the inventory check.
+We defined the SQL interface for the inventory check and product search.
 
 ```yaml
   check-inventory:
@@ -105,6 +105,15 @@ We defined the SQL interface for the inventory check.
       - name: product_id
         type: string
     statement: SELECT product_id, (quantity > 0) as in_stock, quantity as count FROM inventory WHERE product_id = ?
+  search-products:
+    kind: mysql-sql
+    source: storefront
+    description: Search for products by name or description.
+    parameters:
+      - name: query
+        type: string
+        description: The search term.
+    statement: SELECT * FROM products WHERE CONCAT(name, ' ', description) LIKE CONCAT('%', ?, '%')
 ```
 
 ### Step 4: Orchestration (`shopping/agent.py`)
