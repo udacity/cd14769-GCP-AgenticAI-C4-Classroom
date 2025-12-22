@@ -1,4 +1,4 @@
-Shipping Policy
+## Shipping Policy
 
 1. Standard Shipping:
    - Cost: $5.00
@@ -13,13 +13,22 @@ Shipping Policy
    - Cost: $20.00
    - Delivery Time: 10-15 business days.
 
-Returns Policy
+## Returns Policy
 
-1. You may return items within 30 days of delivery.
+1. You must return items within the time period allowed for your state.
+   - The return period is based on the state where we ship the item.
+   - See the table below to determine the return period
 2. Items must be in original condition.
 3. Return shipping is free for defective items. For other reasons, a $5 restocking fee applies.
 
-Tracking
+Return Period:
+* NY and CA: 90 days
+* TX: 45 days
+* All other US states: 30 days
+* International orders: 60 days
+
+
+## Tracking
 
 1. Once your order ships, you will receive a tracking number via email.
 2. You can track your order on our website using the order ID.
