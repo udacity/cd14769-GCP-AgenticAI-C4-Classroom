@@ -234,26 +234,41 @@ def datastore_search_tool(search_query: str):
 
 ### Step 3: The Inquiry Agent (`shipping/agents/inquiry.py`)
 
-This is where the RAG logic comes together. The agent is given both the database
-tool and the search tool.
+This is where the RAG logic comes together. The agent delegates specific questions to specialized sub-agents.
 
 ```python
 # inquiry.py
+get_order_agent = Agent(
+    name="get_order_agent",
+    description="Handles questions about the status of orders",
+    model=model,
+    instruction=read_prompt("inquiry-order-prompt.txt"),
+    tools=[get_order_tool],
+)
+
+policy_search_agent = Agent(
+    name="datastore_search_agent",
+    description="Handles questions about corporate store policies, including shipping policies",
+    model=model,
+    instruction=read_prompt("inquiry-policy-prompt.txt"),
+    tools=[datastore_search_tool],
+)
+
 inquiry_agent = Agent(
-  name="shipping_inquiry_agent",
-  description="Handles questions about shipping policies and tracking.",
-  model=model,
-  instruction=read_prompt("inquiry-prompt.txt"),
-  tools=[get_order_tool, datastore_search_tool],
+    name="shipping_inquiry_agent",
+    description="Handles questions about shipping policies and tracking.",
+    model=model,
+    instruction=read_prompt("inquiry-prompt.txt"),
+    sub_agents=[get_order_agent, policy_search_agent],
 )
 ```
 
 **How it works:**
 
-1. When a customer asks a question, the agent reviews the available tools.
-2. If the question is about a policy, it calls `datastore_search_tool`.
-3. If the question is about an order, it calls `get_order_tool`.
-4. It then uses the results to answer the customer.
+1. When a customer asks a question, the agent reviews the available sub-agents.
+2. If the question is about a policy, it delegates to `policy_search_agent`, which uses `datastore_search_tool`.
+3. If the question is about an order, it delegates to `get_order_agent`, which uses `get_order_tool`.
+4. The sub-agents return their findings, and the inquiry agent synthesizes the answer.
 
 ### Complete Example
 
@@ -261,16 +276,15 @@ The **Shipping Orchestrator** connects these specialized agents.
 
 ```python
 # agent.py
-shipping_agent = Agent(
-  name="shipping_agent",
-  instruction=shipping_instruction,
-  sub_agents=[fulfillment_workflow_agent, approve_order_agent],
-)
+from .agents.shipping import shipping_agent
+from .agents.inquiry import inquiry_agent
 
 root_agent = Agent(
-  name="shipping_orchestrator",
-  instruction=orchestrator_instruction,
-  sub_agents=[shipping_agent, inquiry_agent],
+    name="shipping_orchestrator",
+    description="Main orchestrator for shipping tasks.",
+    model=model,
+    instruction=orchestrator_instruction,
+    sub_agents=[shipping_agent, inquiry_agent],
 )
 ```
 
