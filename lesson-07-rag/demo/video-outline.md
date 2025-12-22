@@ -2,8 +2,8 @@
 
 Multi-Agent RAG with Vertex AI Search and SQL
 
-- We will learn how to implement Multi-Agent Retrieval Augmented Generation (
-  RAG) by combining an agent that searches unstructured policy documents (using
+- We will learn how to implement Multi-Agent Retrieval Augmented Generation
+  (RAG) by combining an agent that searches unstructured policy documents (using
   Vertex AI Search) with an agent that queries structured order data (using the
   MCP Database Toolbox and SQL).
 - Setup
@@ -50,20 +50,23 @@ Multi-Agent RAG with Vertex AI Search and SQL
     - Start the agent: `adk web --a2a` in the `lesson-07-rag/demo` directory.
     - Open the web interface.
 - Demonstration
+    - **WARNING** This agent has been known to make mistakes in the past. 
+      Warn the editors that there may be re-runs of this portion. 
     - Enter the prompt: "I just got order 1001 and I don't like it. How long do
       I have to return it?"
     - Watch the `shipping_orchestrator` route to `shipping_inquiry_agent`.
     - Observe `shipping_inquiry_agent` delegating to `get_order_agent`.
         - `get_order_agent` calls `get-order` tool (SQL).
-        - Returns order details (e.g., "Order 1001, Shipped, Date: ...").
+        - Returns order details (including the address).
     - Observe `shipping_inquiry_agent` delegating to `policy_search_agent`.
         - `policy_search_agent` calls `datastore_search_tool` (Vertex AI).
         - Returns policy chunks (e.g., "Returns accepted within 30 days...").
-    - Observe the final synthesis: The agent combines the order date with the
+    - Observe the final synthesis: The agent combines the order address with the
       30-day policy to give a specific answer (e.g., "Since your order was
-      shipped on [Date], you have until [Date + 30] to return it.").
+      shipped to California, the return policy is...").
 - Conclusion
-    - We've demonstrated Multi-Agent RAG.
+    - We've seen how multi-agent RAG combines information from multiple 
+      sources to answer customer questions about shipping. 
     - We didn't just "search": we combined specific structured data (Order ID)
       with general unstructured knowledge (Policy).
     - This allows for highly personalized and accurate support responses that
