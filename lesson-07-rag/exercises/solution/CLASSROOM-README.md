@@ -113,7 +113,10 @@ We defined the SQL interface for the inventory check and product search.
       - name: query
         type: string
         description: The search term.
-    statement: SELECT * FROM products WHERE CONCAT(name, ' ', description) LIKE CONCAT('%', ?, '%')
+    statement: >
+      SELECT * FROM products
+      WHERE LOWER(CONCAT(name, ' ', description))
+      REGEXP LOWER(REPLACE(TRIM(?), ' ', '|'))
 ```
 
 ### Step 4: Orchestration (`shopping/agent.py`)

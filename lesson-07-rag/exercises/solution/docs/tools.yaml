@@ -15,7 +15,10 @@ tools:
       - name: product_id
         type: string
         description: The ID of the product.
-    statement: SELECT product_id, (quantity > 0) as in_stock, quantity as count FROM inventory WHERE product_id = ?
+    statement: >
+      SELECT product_id, (quantity > 0) as in_stock, quantity as count 
+      FROM inventory 
+      WHERE product_id = ?
   search-products:
     kind: mysql-sql
     source: storefront
@@ -24,4 +27,7 @@ tools:
       - name: query
         type: string
         description: The search term.
-    statement: SELECT * FROM products WHERE CONCAT(name, ' ', description) LIKE CONCAT('%', ?, '%')
+    statement: >
+      SELECT * FROM products
+      WHERE LOWER(CONCAT(name, ' ', description))
+      REGEXP LOWER(REPLACE(TRIM(?), ' ', '|'))
