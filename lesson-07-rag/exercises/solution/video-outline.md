@@ -2,9 +2,12 @@
 
 Multi-Agent RAG for Shopping
 
-- We've seen how to incorporate search through an agent that can access the PDF
-  documents in our library alongside real-time database inventory.
+- We've seen how to incorporate search through an agent that allows shoppers 
+  to ask additional questions about the products they are looking for by 
+  providing information from both product summary sheets in PDF and our 
+  real-time database inventory.
 - Setup
+    - Docs have been loaded into the bucket and then the data store 
     - Ensure `.env` has `DATASTORE_ENGINE_ID` and database credentials.
     - Ensure `toolbox` is running in `docs/` with
       `toolbox --tools-file tools.yaml`.
@@ -32,17 +35,13 @@ Multi-Agent RAG for Shopping
 - running the code
     - start `adk web --a2a` in the `lesson-07-rag/exercises/solution` directory.
 - demonstration
-    - Ask: "Does the Home Theater System support Dolby Atmos?"
-        - Observe routing to `product_qa_agent`.
-        - It searches the PDF manual via Vertex AI.
-        - Returns the specific technical answer.
-    - Ask: "Do you have any in stock?"
-        - Observe routing to `inventory_agent`.
-        - It calls the SQL tool `check-inventory`.
-        - Returns the exact count from the database.
+    - I'm looking for a new smart watch.
+    - Is it water resistant, and do you have any in stock?
+    - Show that it transfers to the two agents to get information and 
+      summarizes the results.
 - Conclusion
-    - We successfully built a Multi-Agent RAG system.
-    - By specializing agents (one for docs, one for DB), we reduce confusion
-      and "hallucinations".
-    - The orchestrator seamlessly routes between "Reading the manual" and "
-      Checking the warehouse".
+    - We successfully built a Multi-Agent RAG system that provides customers 
+      the information they want from the most accurate sources available.
+    - We've seen how the orchestrator seamlessly routes between "Reading the 
+      manual" and "Checking the warehouse" and summarizes that information 
+      for our customer.
