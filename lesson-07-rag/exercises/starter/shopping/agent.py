@@ -1,14 +1,15 @@
 import os
 from google.adk.agents import Agent
-from .search import search_agent
-from .inventory import inventory_agent
-from .cart import cart_agent
+from .agents.search import search_agent
+from .agents.inventory import inventory_agent
+from .agents.cart import cart_agent
+# TODO: Import the product_qa_agent
 
 model = "gemini-2.5-flash"
 
 def read_prompt(filename):
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(script_dir, filename)
+    file_path = os.path.join(script_dir, "prompts", filename)
     with open(file_path, "r") as f:
         return f.read()
 
@@ -19,5 +20,5 @@ root_agent = Agent(
     description="Orchestrates the shopping experience.",
     model=model,
     instruction=orchestrator_instruction,
-    sub_agents=[search_agent, inventory_agent, cart_agent],
+    sub_agents=[search_agent, inventory_agent, cart_agent], # TODO: Add product_qa_agent
 )

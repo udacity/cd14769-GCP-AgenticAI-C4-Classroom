@@ -6,7 +6,7 @@ model = "gemini-2.5-flash"
 
 def read_prompt(filename):
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(script_dir, filename)
+    file_path = os.path.join(script_dir, "prompts", filename)
     with open(file_path, "r") as f:
         return f.read()
 

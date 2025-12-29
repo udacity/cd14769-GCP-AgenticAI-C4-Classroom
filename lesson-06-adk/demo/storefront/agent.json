@@ -9,5 +9,26 @@
     "streaming": false,
     "functions": true
   },
-  "skills": []
+  "skills": [
+    {
+      "id": "handle_customer_request",
+      "name": "Handle Request",
+      "description": "Process natural language requests from customers.",
+      "tags": ["Storefront", "Orchestrator"],
+      "examples": [
+        "Where is my order?",
+        "Ship order 1002"
+      ]
+    },
+    {
+      "id": "shipping_agent",
+      "name": "Shipping Agent",
+      "description": "Handle shipping and tracking of orders.",
+      "tags": ["Shipping", "Orders", "Tracking", "Fulfillment"],
+      "examples": [
+        "Has my order shipped yet?",
+        "Ship my order to 12 Third St, Grand Forks, ND, 56789"
+      ]
+    }
+  ]
 }

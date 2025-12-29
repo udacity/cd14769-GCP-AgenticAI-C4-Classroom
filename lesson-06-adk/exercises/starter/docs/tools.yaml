@@ -8,65 +8,18 @@ sources:
     password: ${MYSQL_PASSWORD}
 tools:
   get-order:
-    kind: mysql-sql
-    source: storefront
-    description: Retrieve an order by its ID.
-    parameters:
-      - name: order_id
-        type: integer
-        description: The ID of the order to retrieve.
-    statement: SELECT * FROM orders WHERE order_id = ?
+    # TODO
   get-open-order-for-user:
-    kind: mysql-sql
-    source: storefront
-    description: Retrieve the open order (orders without a status) for a specific user.
-    parameters:
-      - name: user_id
-        type: string
-        description: The ID of the user.
-    statement: SELECT * FROM orders WHERE user_id = ? AND order_status IS NULL LIMIT 1
+    # TODO
   update-order-address:
-    kind: mysql-sql
-    source: storefront
-    description: Update the shipping address for an order.
-    parameters:
-      - name: address
-        type: string
-        description: The address as a JSON string.
-      - name: order_id
-        type: integer
-        description: The ID of the order to update.
-    statement: UPDATE orders SET address = ? WHERE order_id = ?
+    # TODO
   update-order-status:
-    kind: mysql-sql
-    source: storefront
-    description: Update the status of an order.
-    parameters:
-      - name: status
-        type: string
-        description: The new status of the order.
-      - name: order_id
-        type: integer
-        description: The ID of the order to update.
-    statement: UPDATE orders SET order_status = ? WHERE order_id = ?
+    # TODO
   update-order-costs:
-    kind: mysql-sql
-    source: storefront
-    description: Update the costs and status of an order.
-    parameters:
-      - name: shipping_cost
-        type: float
-        description: The calculated shipping cost.
-      - name: tax_amount
-        type: float
-        description: The calculated tax amount.
-      - name: total_cost
-        type: float
-        description: The total cost of the order.
-      - name: status
-        type: string
-        description: The new status of the order.
-      - name: order_id
-        type: integer
-        description: The ID of the order to update.
-    statement: UPDATE orders SET shipping_cost = ?, tax_amount = ?, total_cost = ?, order_status = ? WHERE order_id = ?
+    # TODO
+  create-order:
+    # TODO
+  update-order-cart:
+    # TODO
+  add-item-to-cart:
+    # TODO

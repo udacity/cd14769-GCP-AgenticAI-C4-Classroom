@@ -11,12 +11,22 @@
   },
   "skills": [
     {
+      "id": "get_order_status",
+      "name": "Get Order Status",
+      "description": "Retrieve the current status of an order.",
+      "tags": ["Shipping", "Status"],
+      "examples": [
+        "Where is order #123?",
+        "Is my package shipped?"
+      ]
+    },
+    {
       "id": "fulfill_order",
       "name": "Fulfill Order",
-      "description": "Complete an order and prepare it for shipping",
-      "tags": ["Shipping", "Order"],
+      "description": "Given the name and address for an order number, process an order for shipment.",
+      "tags": ["Shipping", "Fulfillment"],
       "examples": [
-        "Ship order 1001 to Allen, 123 Main St, Anywhere, CA, 98765"
+        "Ship order 6429 to Scott, 12 Third St, Forth, TX, 67890"
       ]
     }
   ]

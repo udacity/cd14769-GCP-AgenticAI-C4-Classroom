@@ -43,3 +43,474 @@ Other requirements for the code:
   setup information. You can look at the README.md from previous modules for 
   examples.
 * It should be clear and well documented
+
+# Reviewing demos and exercises
+
+If asked to review an existing demo or starter, evaluate it based on
+the following and suggest possible improvements:
+
+* Review all the prompts in files named `*-prompt.txt`. Each should clearly 
+  state what the role of the agent is, give clear scenarios how to handle 
+  exceptional input and output, and generally steer it towards safe and 
+  effective results.
+* Review functions and tools to check if there is sufficient error handling.
+* Make sure there is a `CLASSROOM-README.md` file. This should contain the 
+  information outlined below and be detailed and thorough.
+* Make sure there is a `.env-sample` file, created as described below.
+* Agents that are substantially similar to the agent from the previous 
+  lesson should have similar, or identical, prompts to the previous lesson. 
+  If the agent has changed, evaluate the new prompt in light of those changes.
+
+# Building the exercise starter
+
+You are an expert technical educator.
+You will be helping create starter files that students should build upon.
+These files will be in the "exercises/starter" directory and should be based 
+on the files that are in "exercises/solution".
+Information about the lesson being taught can be found in the 
+"module-outline.md" file.
+
+Guidelines:
+- The starter files should contain boilerplate code, or other code that is
+  incidental to the lesson being taught.
+- You should only use code that is present in the solution files. You should 
+  not create any new code.
+- You should not edit the original solution in any way. Just produce the 
+  files in the starter that can be used to create the solution.
+- For parts of the files that the student will need to fill in, they should 
+  be marked with a comment starting with "TODO:"
+- You should create an ".env-sample" file based on the environment 
+  information provided in the README.md file in the solution directory.
+- The __init__.py file should be copied verbatim
+- Prompt files should just have the contents "TODO"
+
+# Generate "CLASSROOM-README.md" from Code Repository
+
+You are an expert technical educator.
+Analyze a code repository and generate a README based on the specified type.
+
+
+## INPUT
+- The lesson number
+- README type: **demo**, **starter**, or **solution**
+- You can get the topic / lesson focus based on the "module-outline.md" file
+
+Based on the lesson number and the type, you will know the root directory of
+the files you will be working with.
+- For **demo** types, this will be "demo"
+- For **starter** types, this will be "exercises/starter"
+- For **solution** types, this will be "exercises/solution"
+
+## README TYPES
+
+### Type 1: DEMO README
+**Purpose**: Explain and describe existing code walkthrough
+**Tone**: Descriptive - "This code does...", "Here's how it works..."
+
+### Type 2: STARTER README
+**Purpose**: Give instructions for learners to implement
+**Tone**: Instructional - "Build a...", "Implement...", "Your task is..."
+
+### Type 3: SOLUTION README
+**Purpose**: Explain and describe the solution code
+**Tone**: Descriptive - "The solution works by...", "This implementation..."
+
+---
+
+
+## OUTPUT STRUCTURE
+
+
+# {Lesson Title}
+
+
+{One sentence describing what this lesson teaches, followed by what example 
+we are using to learn this lesson. (eg - something like "We will learn how 
+to incorporate search by creating an agent that can access the PDF documents 
+in our library.")} 
+
+
+---
+
+
+## Overview
+
+
+### What You'll Learn
+
+
+{2-3 sentences explaining what learners will be able to do}
+
+
+Learning objectives:
+- {Objective 1}
+- {Objective 2}
+- {Objective 3}
+
+
+### Prerequisites
+
+
+- {Prerequisite 1}
+- {Prerequisite 2}
+
+
+---
+
+
+## Understanding the Concept
+
+
+### The Problem
+
+
+{What problem does this solve? Use a relatable scenario and tie it to a 
+business case where possible.}
+
+
+### The Solution
+
+
+{How does this concept/technique solve the problem?}
+
+
+### How It Works
+
+
+{Explain the mechanism, architecture, or workflow}
+
+
+{If multiple components/steps:}
+
+
+**Step 1: {Name}**
+{Explanation}
+
+
+**Step 2: {Name}**
+{Explanation}
+
+
+### Key Terms
+
+
+**{Term 1}**: {Definition}
+
+
+**{Term 2}**: {Definition}
+
+
+---
+
+
+## CODE WALKTHROUGH (for demo/solution) OR EXERCISE INSTRUCTIONS (for starter)
+
+
+---
+
+
+### IF README TYPE = "demo" OR "solution":
+
+
+## Code Walkthrough
+
+
+### Repository Structure
+
+
+```
+{file-structure}
+├── {file}  # {Description}
+└── {file}  # {Description}
+```
+
+
+### Step 1: {Implementation Step}
+
+
+{Describe what this code does and why}
+
+
+```{language}
+{Actual code from repository with inline comments}
+```
+
+
+**Key points:**
+- {Important detail}
+- {Important detail}
+
+
+### Step 2: {Implementation Step}
+
+
+{Describe what this code does and why}
+
+
+```{language}
+{Actual code from repository with inline comments}
+```
+
+
+**Key points:**
+- {Important detail}
+- {Important detail}
+
+
+### Complete Example
+
+
+{Show the full working code}
+
+
+```{language}
+{Complete code with comments}
+```
+
+
+**How it works:**
+1. {Explanation of key section}
+2. {Explanation of key section}
+3. {Explanation of key section}
+
+
+**Expected output:**
+```
+{What this code produces when run}
+```
+
+
+---
+
+
+### IF README TYPE = "starter":
+
+
+## Exercise Instructions
+
+
+### Your Task
+
+
+{Clear description of what the learner needs to build}
+
+
+### Requirements
+
+
+Your implementation must:
+1. {Requirement 1}
+2. {Requirement 2}
+3. {Requirement 3}
+4. {Requirement 4}
+
+
+### Repository Structure
+
+
+```
+{file-structure}
+├── {file}  # {Description - what learner will modify}
+└── {file}  # {Description}
+```
+
+Make sure you copy ".env-sample" to ".env" and edit it to add the Google
+Cloud project you are working with.
+
+{Provide any other instructions about the environment variables necessary}
+
+Remember that you should **never** check-in your .env file to git.
+
+### Starter Code
+
+
+{Explain what's provided and what needs to be completed}
+
+
+```{language}
+{Partial code with TODO comments}
+
+
+# TODO: {Instruction for what to implement}
+
+
+# TODO: {Instruction for what to implement}
+```
+
+
+### Expected Behavior
+
+
+{Describe what the completed implementation should do}
+
+**Running the agent:**
+
+You will run the agent using the `adk web` tool. This tool launches a chat
+environment that lets you test the agent interactively and examine the
+internal processing that ADK and Gemini go through.
+
+The `adk web` application is meant to be run from a directory that has a
+collection of agents, which is usually the parent directory from where your
+agent's code is. Typically, you will run this on the same machine where your
+browser is located with a command such as:
+
+```bash
+adk web
+```
+
+{Provide any other information about starting it that are needed}
+
+**Example usage:**
+```
+{How to run/test the code}
+```
+
+
+**Expected output:**
+```
+{What correct implementation produces}
+```
+
+
+### Implementation Hints
+
+
+1. {Hint without giving away solution}
+2. {Hint without giving away solution}
+3. {Hint without giving away solution}
+
+
+---
+
+
+## Important Details
+
+
+### Common Misconceptions
+
+
+**Misconception**: "{Common misunderstanding}"
+**Reality**: {Correct explanation}
+
+
+**Misconception**: "{Common misunderstanding}"
+**Reality**: {Correct explanation}
+
+
+### Best Practices
+
+
+1. **{Practice 1}**: {Explanation based on repository code}
+2. **{Practice 2}**: {Explanation based on repository code}
+
+
+### Common Errors
+
+
+**Error**: {Description of typical error}
+- **Cause**: {Why it happens}
+- **Solution**: {How to fix it}
+
+
+**Error**: {Description of typical error}
+- **Cause**: {Why it happens}
+- **Solution**: {How to fix it}
+
+
+---
+
+
+## GUIDELINES
+
+
+- Extract actual code from the repository - do not invent examples
+- For demo/solution: Explain what the code does and why it works
+- For starter: Give clear instructions on what to build, not how to build it
+- Use code blocks with inline comments
+- Keep explanations concise (3-5 sentences per section)
+- Include expected output examples
+- Use the term "customer" when talking about the person who is using the agent
+
+# Building a "video-outline.md"
+
+You are an expert technical educator.
+Based on the code for either a module demo or exercise solution, the 
+information about a module in the "module-outline.md" file, and the contents 
+of the "CLASSROOM-README.md" file for the demo or exercise, you will create 
+an outline that will be used to present the demo or solution.
+
+Guidelines:
+- Before generating or updating the "module-outline.md" file, you should 
+  read through all of the code and files available for this module.
+  - Focus on the "CLASSROOM-README.md" file, since it also contains a 
+    summary of what is being taught.
+  - Make sure you focus on the changes introduced in this lesson. This may 
+    require you to look at the files from previous lessons to understand 
+    what has changed.
+- This outline will be used by the instructor to create a walk-through of 
+  the code and then running and testing the code.
+  - For the demo, the instructor will be introducing the concepts that this 
+    module is intended to teach and that the code is intended to illustrate. 
+    It should be making concepts clear as they are walking through the code. 
+  - For the exercise solution walk-through, the code will already be written,
+    so the instructor is going over the code, not talking about what needs 
+    doing.
+- Focus on the new elements that are being introduced and taught
+- Each presentation should be about 5 minutes spoken
+- The outline will be guidance for the instructor, not a script
+- The outline should be presented sequentially, so the instructor can go 
+  linearly from point to point.
+  - The code should be presented in a top-down format, introducing the main 
+    `root_agent` first and then seeing how those parts are broken down.
+- Be specific - mention specific files, functions, commands, and prompts. 
+  Remember that the instructor will be following this to make their 
+  presentation.
+- When talking about files, reference them relative to the top level of
+  either the demo or exercise solution directory, as appropriate.
+
+Format:
+- Produce a list of bullet points of the major things to highlight
+- Be specific 
+  - mention specific files, functions, and line numbers
+  - give specific commands to run or prompts to try to illustrate
+  - when covering setup, give specific steps to follow
+- Each bullet point should be about one line long
+- If there are additional things to mention related to the major point, use 
+  an indented sub-list under the bullet
+- The title will include the name of the project directory (either "cd14768" 
+  or "cd14769")
+
+Once you have completed writing the outline, wait for instructions before 
+proceeding to the next one. We often need to review and revise it. When 
+revising it, make sure you've read it to see if there are any changes since 
+you wrote it.
+
+## Output structure
+
+# {project directory} - Lesson {module number} - {"demo" or "exercise"}
+{name of lesson}
+
+- {If this is for the Demo: One sentence describing what this lesson teaches, 
+  followed by what example we will be using to learn this lesson.  
+  (eg - something like "We will learn how to incorporate search by creating an 
+  agent that can access the PDF documents in our library.")}
+- {If this is for the Exercise Solution: One sentence describing what we 
+  hope the student has learned, followed by the example that was used to 
+  help focus on that lesson. (eg - something like "We've seen how to 
+  incorporate search through an agent that can access the PDF documents in 
+  our library.")}
+- Setup
+  - {list of detailed setup instructions}
+- [{file with change}] {highlight code or prompt change}
+  - {reason for change}
+  - {relationship to overall lesson}
+  - {important concept to learn from this, if relevant}
+- {...repeat above as necessary to show all new code, configuration, and prompts}
+- running the code
+  - start `adk web` in another window. {other command line parameters as needed}
+  - {other startup instructions as needed}
+- demonstration
+  - {steps to illustrate}
+- {...repeat any of the above as necessary to show changes}
+- {conclusion and summary}
+

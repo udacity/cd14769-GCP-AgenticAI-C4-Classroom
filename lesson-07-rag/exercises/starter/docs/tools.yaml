@@ -1,0 +1,13 @@
+sources:
+  storefront:
+    kind: mysql
+    host: ${MYSQL_HOST}
+    port: ${MYSQL_PORT:3306}
+    database: storefront
+    user: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
+tools:
+  check-inventory:
+    # TODO
+  search-products:
+    # TODO
