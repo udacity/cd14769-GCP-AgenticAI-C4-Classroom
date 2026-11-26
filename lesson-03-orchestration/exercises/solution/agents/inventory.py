@@ -3,7 +3,10 @@ from pydantic import BaseModel, Field
 from google.adk.agents import Agent, LlmAgent
 from .products import products, product_counts
 
-model = "gemini-2.5-flash"
+model = "gemini-3.8-flash"
+# Agents that use tools and an output_schema together run on Flash-Lite: with both, the
+# Gemini 3 Flash models tend to call the tool again instead of answering.
+schema_model = "gemini-3.5-flash-lite"
 
 def read_prompt(filename):
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -41,7 +44,7 @@ class InventoryData(BaseModel):
 inventory_data_agent = LlmAgent(
     name="inventory_data_agent",
     description="Checks product inventory and returns structured data.",
-    model=model,
+    model=schema_model,
     instruction="Check the inventory for the given product ID and return the details.",
     tools=[check_inventory],
     output_schema=InventoryData

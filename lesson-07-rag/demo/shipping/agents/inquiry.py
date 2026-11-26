@@ -3,7 +3,7 @@ from google.adk.agents import Agent
 from toolbox_core import ToolboxSyncClient
 from .datastore import datastore_search_tool
 
-model = "gemini-2.5-flash"
+model = "gemini-3.8-flash"
 
 def read_prompt(filename):
     script_dir = os.path.dirname(os.path.abspath(__file__))

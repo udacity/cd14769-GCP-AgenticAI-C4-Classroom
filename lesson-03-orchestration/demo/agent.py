@@ -3,7 +3,7 @@ from google.adk.agents import Agent
 from .agents.shipping import shipping_agent
 from .agents.inquiry import inquiry_agent
 
-model = "gemini-2.5-flash"
+model = "gemini-3.8-flash"
 
 # Helper to read prompt
 def read_prompt(filename):

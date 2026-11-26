@@ -18,7 +18,7 @@ class OrderStatus(Enum):
     SHIPPED = "shipped"
     RECEIVED = "received"
 
-model = "gemini-2.5-flash"
+model = "gemini-3.8-flash"
 
 def read_prompt(filename):
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -135,7 +135,6 @@ shipping_cost_agent = LlmAgent(
     model=model,
     instruction=read_prompt("shipping-cost-prompt.txt"),
     tools=[calculate_shipping_cost],
-    output_schema=ShippingCostOutput,
 )
 
 taxes_cost_agent = LlmAgent(
@@ -144,7 +143,6 @@ taxes_cost_agent = LlmAgent(
     model=model,
     instruction=read_prompt("taxes-cost-prompt.txt"),
     tools=[calculate_taxes_cost],
-    output_schema=TaxCostOutput,
 )
 
 costs_agent = ParallelAgent(
@@ -159,7 +157,6 @@ compute_order_agent = LlmAgent(
     model=model,
     instruction=read_prompt("compute-order-prompt.txt"),
     tools=[compute_order_cost, update_order_costs_tool],
-    output_schema=ComputeOrderOutput,
 )
 
 place_order_agent = LlmAgent(
@@ -168,7 +165,6 @@ place_order_agent = LlmAgent(
     model=model,
     instruction=read_prompt("place-order-prompt.txt"),
     tools=[get_user, get_order_tool, get_open_order_tool, update_order_address_tool],
-    output_schema=PlaceOrderOutput,
 )
 
 order_summary_agent = LlmAgent(

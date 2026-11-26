@@ -35,7 +35,7 @@ Extend the shopping cart so it can answer questions about a product, including p
 # .env file example
 GOOGLE_GENAI_USE_VERTEXAI=TRUE
 GOOGLE_CLOUD_PROJECT=<your project ID>
-GOOGLE_CLOUD_LOCATION=us-central1
+GOOGLE_CLOUD_LOCATION=global
 
 TOOLBOX_URL=http://127.0.0.1:5001
 
@@ -50,8 +50,9 @@ DATASTORE_LOCATION=global
 
 Make sure you replace <your project ID> with the ID for your project.
 
-Using a LOCATION of us-central1 is usually the best bet in the United States,
-but consider other cloud data center locations for elsewhere.
+Use a LOCATION of global: the Gemini models these exercises use are served
+there. In the course's lab projects, a regional location such as
+us-central1 answers 404 NOT_FOUND.
 
 See below for the values that are needed for the TOOLBOX_URL and the
 various MYSQL environment variables
@@ -110,7 +111,7 @@ GRANT SELECT ON `db_name`.* TO `user_name`@`%`;
 
 ### Setup and run MCP Toolbox
 
-See [here](https://googleapis.github.io/genai-toolbox/getting-started/introduction/)
+See [here](https://mcp-toolbox.dev/documentation/introduction/#install-toolbox)
 for how to download the toolbox server for your platform.
 
 To run the MCP server:

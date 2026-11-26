@@ -5,7 +5,7 @@ from .agents.inventory import inventory_agent
 from .agents.cart import cart_agent
 # TODO: Import the product_qa_agent
 
-model = "gemini-2.5-flash"
+model = "gemini-3.8-flash"
 
 def read_prompt(filename):
     script_dir = os.path.dirname(os.path.abspath(__file__))

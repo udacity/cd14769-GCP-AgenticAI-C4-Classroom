@@ -9,7 +9,10 @@ from .order_data import orders, OrderStatus
 from .rates import SHIPPING_RATES, TAX_RATES
 from .products import products
 
-model = "gemini-2.5-flash"
+model = "gemini-3.8-flash"
+# Agents that use tools and an output_schema together run on Flash-Lite: with both, the
+# Gemini 3 Flash models tend to call the tool again instead of answering.
+schema_model = "gemini-3.5-flash-lite"
 logger = logging.getLogger(__name__)
 
 def read_prompt(filename):
@@ -171,7 +174,7 @@ def approve_order(order_id: str) -> dict:
 shipping_cost_agent = LlmAgent(
     name="shipping_cost_agent",
     description="Calculates the shipping cost for an order.",
-    model=model,
+    model=schema_model,
     instruction=read_prompt("shipping-cost-prompt.txt"),
     tools=[calculate_shipping_cost],
     output_schema=ShippingCostOutput,
@@ -180,7 +183,7 @@ shipping_cost_agent = LlmAgent(
 free_shipping_agent = LlmAgent(
     name="free_shipping_agent",
     description="Calculates shipping cost for free shipping eligible orders.",
-    model=model,
+    model=schema_model,
     instruction=read_prompt("free-shipping-prompt.txt"),
     tools=[calculate_shipping_cost],
     output_schema=ShippingCostOutput,
@@ -244,7 +247,7 @@ shipping_router_agent = ShippingRouter(
 taxes_cost_agent = LlmAgent(
     name="taxes_cost_agent",
     description="Calculates the tax amount for an order based on the destination state.",
-    model=model,
+    model=schema_model,
     instruction=read_prompt("taxes-cost-prompt.txt"),
     tools=[calculate_taxes_cost],
     output_schema=TaxCostOutput,
@@ -259,7 +262,7 @@ costs_agent = ParallelAgent(
 compute_order_agent = LlmAgent(
     name="compute_order_agent",
     description="Combines shipping and tax costs to compute the order total.",
-    model=model,
+    model=schema_model,
     instruction=read_prompt("compute-order-prompt.txt"),
     tools=[compute_order_cost],
     output_schema=ComputeOrderOutput,
@@ -268,7 +271,7 @@ compute_order_agent = LlmAgent(
 place_order_agent = LlmAgent(
     name="place_order_agent",
     description="Handles the initial placement of an order by setting the address.",
-    model=model,
+    model=schema_model,
     instruction=read_prompt("place-order-prompt.txt"),
     tools=[place_order],
     output_schema=PlaceOrderOutput,
