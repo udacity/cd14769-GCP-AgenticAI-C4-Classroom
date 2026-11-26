@@ -8,7 +8,7 @@ from .order_data import orders, OrderStatus
 from .rates import SHIPPING_RATES, TAX_RATES
 from .products import products
 
-model = "gemini-2.5-flash"
+model = "gemini-3.8-flash"
 
 def read_prompt(filename):
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -171,7 +171,6 @@ shipping_cost_agent = LlmAgent(
     model=model,
     instruction=read_prompt("shipping-cost-prompt.txt"),
     tools=[calculate_shipping_cost],
-    output_schema=ShippingCostOutput,
 )
 
 free_shipping_agent = LlmAgent(
@@ -180,7 +179,6 @@ free_shipping_agent = LlmAgent(
     model=model,
     instruction=read_prompt("free-shipping-prompt.txt"),
     tools=[calculate_shipping_cost],
-    output_schema=ShippingCostOutput,
 )
 
 class ShippingRouter(BaseAgent):
@@ -223,7 +221,6 @@ taxes_cost_agent = LlmAgent(
     model=model,
     instruction=read_prompt("taxes-cost-prompt.txt"),
     tools=[calculate_taxes_cost],
-    output_schema=TaxCostOutput,
 )
 
 costs_agent = ParallelAgent(
@@ -238,7 +235,6 @@ compute_order_agent = LlmAgent(
     model=model,
     instruction=read_prompt("compute-order-prompt.txt"),
     tools=[compute_order_cost],
-    output_schema=ComputeOrderOutput,
 )
 
 place_order_agent = LlmAgent(
@@ -247,7 +243,6 @@ place_order_agent = LlmAgent(
     model=model,
     instruction=read_prompt("place-order-prompt.txt"),
     tools=[place_order],
-    output_schema=PlaceOrderOutput,
 )
 
 order_summary_agent = LlmAgent(

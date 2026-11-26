@@ -2,7 +2,7 @@ import os
 from pydantic import BaseModel, Field
 from google.adk.agents import Agent, LlmAgent
 
-model = "gemini-2.5-flash"
+model = "gemini-3.8-flash"
 
 def read_prompt(filename):
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -33,5 +33,4 @@ inventory_data_agent = LlmAgent(
     model=model,
     instruction="Check the inventory for the given product ID and return the details.",
     tools=[], # TODO - add tool
-    output_schema=InventoryData
 )

@@ -7,7 +7,7 @@ from google.adk.tools import ToolContext
 from .products import products
 from .inventory import inventory_data_agent
 
-model = "gemini-2.5-flash"
+model = "gemini-3.8-flash"
 
 def read_prompt(filename):
     script_dir = os.path.dirname(os.path.abspath(__file__))

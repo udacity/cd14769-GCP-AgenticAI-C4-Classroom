@@ -5,7 +5,7 @@ from google.adk.agents import Agent, LlmAgent, BaseAgent, InvocationContext
 from google.adk.events import Event
 from .products import products
 
-model = "gemini-2.5-flash"
+model = "gemini-3.8-flash"
 
 def read_prompt(filename):
     script_dir = os.path.dirname(os.path.abspath(__file__))

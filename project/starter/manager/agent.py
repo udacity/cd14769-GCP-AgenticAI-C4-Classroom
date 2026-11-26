@@ -23,9 +23,9 @@ sub_agents=[
   # TODO: Add sub-agents
 ]
 
-# Use the Gemini 2.5 Flash model since it performs quickly
+# Use the Gemini 3.8 Flash model since it performs quickly
 # and handles the processing well.
-model = "gemini-2.5-flash"
+model = "gemini-3.8-flash"
 
 # Create our agent
 root_agent = # TODO: Implement root agent

@@ -7,7 +7,7 @@ from .products import products
 from .order_data import orders, OrderStatus, get_next_order_id
 from .inventory import inventory_data_agent
 
-model = "gemini-2.5-flash"
+model = "gemini-3.8-flash"
 
 def read_prompt(filename):
     script_dir = os.path.dirname(os.path.abspath(__file__))
